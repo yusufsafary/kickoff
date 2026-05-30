@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>WC2026 — Supporter Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E;
+    --gold: #F0A500;
+    --offwhite: #F2EBD9;
+    --ink: #0a0a0a;
+    --smoke: #1a1a1a;
+    --mid: #2e2e2e;
+    --fade: #888;
+    --green: #2E7D32;
+    --correct: #4CAF50;
+    --wrong: #C8102E;
+    --partial: #F0A500;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--offwhite);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+
+  /* ─── TIFO TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.008) 3px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── TIFO BANNER STRIPS ─── */
+  .tifo-stripe {
+    height: 6px;
+    background: repeating-linear-gradient(90deg,
+      var(--red) 0px, var(--red) 40px,
+      var(--offwhite) 40px, var(--offwhite) 80px,
+      var(--ink) 80px, var(--ink) 120px,
+      var(--gold) 120px, var(--gold) 160px
+    );
+    position: relative; z-index: 2;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+    background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+    border-bottom: 2px solid var(--mid);
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(200,16,46,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wc-flag-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    padding: 0 0.5rem;
+  }
+
+  .flag-chip {
+    font-size: 1.5rem;
+    animation: flagWave 3s ease-in-out infinite;
+    display: inline-block;
+  }
+  .flag-chip:nth-child(2) { animation-delay: 0.2s; }
+  .flag-chip:nth-child(3) { animation-delay: 0.4s; }
+  .flag-chip:nth-child(4) { animation-delay: 0.6s; }
+  .flag-chip:nth-child(5) { animation-delay: 0.8s; }
+  .flag-chip:nth-child(6) { animation-delay: 1.0s; }
+  .flag-chip:nth-child(7) { animation-delay: 1.2s; }
+  .flag-chip:nth-child(8) { animation-delay: 1.4s; }
+
+  @keyframes flagWave {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+  }
+
+  .main-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 14vw, 7rem);
+    letter-spacing: 0.04em;
+    line-height: 0.9;
+    color: var(--offwhite);
+    text-shadow: 4px 4px 0 var(--red), 8px 8px 0 rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .main-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.2rem, 5vw, 2rem);
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-top: 0.3rem;
+  }
+
+  .header-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--fade);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.6rem;
+  }
+
+  /* ─── NAV DOTS ─── */
+  .nav-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--red);
+    display: flex;
+    justify-content: space-around;
+    padding: 0.7rem 0.5rem;
+  }
+
+  .nav-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--fade);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    transition: color 0.2s;
+    text-transform: uppercase;
+  }
+  .nav-btn:hover, .nav-btn.active { color: var(--gold); }
+
+  /* ─── SECTION LAYOUT ─── */
+  .game-section {
+    position: relative; z-index: 1;
+    padding: 2rem 1rem 3rem;
+    border-bottom: 1px solid var(--mid);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    border-left: 5px solid var(--red);
+    padding-left: 0.8rem;
+  }
+
+  .section-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--red);
+    opacity: 0.4;
+  }
+
+  .section-title-wrap {}
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.06em;
+    color: var(--offwhite);
+    line-height: 1;
+  }
+  .section-desc {
+    font-size: 0.8rem;
+    color: var(--fade);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 0.1rem;
+  }
+
+  /* ─── BUTTON BASE ─── */
+  .btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    border: 2px solid currentColor;
+    background: none;
+    cursor: pointer;
+    padding: 0.7rem 1.5rem;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .btn:active::after { opacity: 0.15; }
+
+  .btn-red { color: var(--red); }
+  .btn-gold { color: var(--gold); }
+  .btn-white { color: var(--offwhite); }
+  .btn-full { width: 100%; display: block; text-align: center; }
+
+  /* ═══════════════════════════════
+     GAME 1 — PENALTY SHOOTOUT
+  ═══════════════════════════════ */
+  #penalty-game { background: linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%); }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--smoke);
+    border: 2px solid var(--mid);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .score-team {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    color: var(--fade);
+  }
+
+  .score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--offwhite);
+  }
+
+  .score-sep {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--mid);
+  }
+
+  .kick-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .kick-dot {
+    width: 22px; height: 22px;
+    border: 2px solid var(--mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+    transition: all 0.3s;
+  }
+  .kick-dot.goal { background: var(--correct); border-color: var(--correct); }
+  .kick-dot.miss { background: var(--wrong); border-color: var(--wrong); }
+  .kick-dot.current { border-color: var(--gold); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,165,0,0.4); } 50% { box-shadow: 0 0 0 6px rgba(240,165,0,0); } }
+
+  /* GOAL VISUAL */
+  .goal-container {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 1.5rem;
+    user-select: none;
+  }
+
+  .goal-frame {
+    position: relative;
+    width: 100%;
+    padding-bottom: 55%;
+    background: linear-gradient(180deg, #1a4a1a 0%, #1e5a1e 60%, #8B6914 100%);
+    border: 4px solid var(--offwhite);
+    border-bottom: none;
+    overflow: hidden;
+  }
+
+  .goal-net {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 1px, transparent 1px, transparent 18px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 1px, transparent 1px, transparent 18px);
+  }
+
+  .goal-zones {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .zone {
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .zone:hover { background: rgba(240,165,0,0.15); }
+  .zone:active { background: rgba(240,165,0,0.3); }
+
+  .zone-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .goal-post-h {
+    position: absolute;
+    bottom: 0; left: -4px; right: -4px;
+    height: 6px;
+    background: var(--offwhite);
+    z-index: 2;
+  }
+
+  /* Ball animation */
+  .ball {
+    position: absolute;
+    width: 28px; height: 28px;
+    background: radial-gradient(circle at 35% 35%, #fff 0%, #ddd 40%, #888 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .ball.shooting { bottom: 10%; }
+
+  .goal-flash {
+    position: absolute; inset: 0;
+    background: rgba(76,175,80,0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.2s;
+  }
+  .goal-flash.show { opacity: 1; }
+
+  .miss-flash {
+    position: absolute; inset: 0;
+    background: rgba(200,16,46,0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.2s;
+  }
+  .miss-flash.show { opacity: 1; }
+
+  .penalty-status {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    min-height: 2rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  /* ═══════════════════════════════
+     GAME 2 — TRIVIA QUIZ
+  ═══════════════════════════════ */
+  #trivia-game { background: linear-gradient(180deg, #0d0a0a 0%, #0a0a0a 100%); }
+
+  .quiz-progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1.2rem;
+  }
+
+  .q-pip {
+    flex: 1; height: 4px;
+    background: var(--mid);
+    transition: background 0.3s;
+  }
+  .q-pip.done { background: var(--correct); }
+  .q-pip.wrong { background: var(--wrong); }
+  .q-pip.current { background: var(--gold); animation: pulse 1s infinite; }
+
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .quiz-cat {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  .quiz-score-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+
+  .quiz-question {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    color: var(--offwhite);
+    margin-bottom: 1.5rem;
+    min-height: 5rem;
+    border-left: 4px solid var(--gold);
+    padding-left: 0.8rem;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .quiz-opt {
+    background: var(--smoke);
+    border: 2px solid var(--mid);
+    color: var(--offwhite);
+    padding: 0.9rem 0.7rem;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.03em;
+  }
+
+  .quiz-opt:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .quiz-opt.correct { background: rgba(76,175,80,0.2); border-color: var(--correct); color: var(--correct); }
+  .quiz-opt.wrong { background: rgba(200,16,46,0.2); border-color: var(--wrong); color: var(--wrong); }
+  .quiz-opt:disabled { cursor: default; }
+
+  .quiz-feedback {
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--fade);
+    min-height: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ═══════════════════════════════
+     GAME 3 — PLAYER WORDLE
+  ═══════════════════════════════ */
+  #wordle-game { background: linear-gradient(180deg, #0a0a0d 0%, #0a0a0a 100%); }
+
+  .wordle-clues {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--smoke);
+    border: 2px solid var(--mid);
+    padding: 1rem;
+  }
+
+  .clue-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .clue-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fade);
+  }
+
+  .clue-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--offwhite);
+    letter-spacing: 0.05em;
+  }
+
+  .wordle-guesses {
+    margin-bottom: 1rem;
+  }
+
+  .guess-row {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 0.35rem;
+    min-height: 3rem;
+    align-items: center;
+  }
+
+  .guess-letter {
+    flex: 1;
+    height: 2.8rem;
+    border: 2px solid var(--mid);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    background: var(--smoke);
+    transition: all 0.3s;
+  }
+
+  .guess-letter.correct { background: var(--correct); border-color: var(--correct); color: #fff; }
+  .guess-letter.partial { background: var(--partial); border-color: var(--partial); color: var(--ink); }
+  .guess-letter.wrong-letter { background: var(--mid); border-color: var(--mid); color: var(--fade); }
+
+  .wordle-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .wordle-input {
+    flex: 1;
+    background: var(--smoke);
+    border: 2px solid var(--mid);
+    color: var(--offwhite);
+    padding: 0.8rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .wordle-input:focus { border-color: var(--gold); }
+  .wordle-input::placeholder { color: var(--mid); }
+
+  .wordle-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .kb-row {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+  }
+
+  .kb-key {
+    min-width: 2rem;
+    height: 2.4rem;
+    padding: 0 0.3rem;
+    background: var(--mid);
+    border: none;
+    color: var(--offwhite);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex: 1;
+    max-width: 2.6rem;
+  }
+  .kb-key.wide { max-width: 3.8rem; font-size: 0.7rem; }
+  .kb-key.correct { background: var(--correct); }
+  .kb-key.partial { background: var(--partial); color: var(--ink); }
+  .kb-key.wrong-key { background: #222; color: #555; }
+
+  .wordle-msg {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+    min-height: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ═══════════════════════════════
+     GAME 4 — MATCH BINGO
+  ═══════════════════════════════ */
+  #bingo-game { background: linear-gradient(180deg, #0a0d0a 0%, #0a0a0a 100%); }
+
+  .bingo-card {
+    background: var(--smoke);
+    border: 3px solid var(--mid);
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+
+  .bingo-card::before {
+    content: 'BINGO';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    color: var(--red);
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.5rem;
+  }
+
+  .bingo-header {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.4rem;
+  }
+
+  .bingo-col-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--red);
+    width: calc(20% - 4px);
+    text-align: center;
+  }
+
+  .bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  .bingo-cell {
+    aspect-ratio: 1;
+    background: var(--ink);
+    border: 2px solid var(--mid);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    line-height: 1.2;
+    color: var(--offwhite);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bingo-cell:hover:not(.marked) { border-color: var(--gold); }
+
+  .bingo-cell.marked {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  .bingo-cell.marked::after {
+    content: '✓';
+    position: absolute;
+    top: 1px; right: 2px;
+    font-size: 0.5rem;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .bingo-cell.free {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+    font-weight: 900;
+    cursor: default;
+  }
+
+  .bingo-cell.bingo-line {
+    background: var(--correct);
+    border-color: var(--correct);
+    animation: bingoFlash 0.5s ease;
+  }
+
+  @keyframes bingoFlash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  .bingo-status {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.12em;
+    min-height: 2rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .bingo-marked-count {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: var(--fade);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .marked-count-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--offwhite);
+  }
+
+  /* ─── GAME RESULT OVERLAY ─── */
+  .result-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .result-overlay.show { display: flex; }
+
+  .result-box {
+    background: var(--ink);
+    border: 3px solid var(--gold);
+    padding: 2rem;
+    text-align: center;
+    max-width: 340px;
+    width: 100%;
+    position: relative;
+  }
+
+  .result-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    color: var(--fade);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.75rem;
+    color: var(--fade);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--mid);
+  }
+
+  footer strong { color: var(--red); font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; }
+
+  /* ─── UTILITY ─── */
+  .mt-1 { margin-top: 0.5rem; }
+  .mt-2 { margin-top: 1rem; }
+  .text-center { text-align: center; }
+  .flex-center { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+
+  .tifo-divider {
+    height: 2px;
+    background: repeating-linear-gradient(90deg,
+      var(--red) 0px, var(--red) 20px,
+      transparent 20px, transparent 24px
+    );
+    margin: 1.5rem 0;
+    opacity: 0.4;
+  }
+
+  /* Shake animation */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* Flare decoration */
+  .flare-deco {
+    font-size: 1.5rem;
+    display: inline-block;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="tifo-stripe"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="wc-flag-row">
+    <span class="flag-chip">🇧🇷</span>
+    <span class="flag-chip">🇩🇪</span>
+    <span class="flag-chip">🇫🇷</span>
+    <span class="flag-chip">🇪🇸</span>
+    <span class="flag-chip">🇦🇷</span>
+    <span class="flag-chip">🇵🇹</span>
+    <span class="flag-chip">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+    <span class="flag-chip">🇯🇵</span>
+  </div>
+  <div class="main-title">WORLD<br>CUP</div>
+  <div class="main-subtitle">USA · CAN · MEX — 2026</div>
+  <div class="header-tagline">🔥 Four Games · One Passion · No Surrender</div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <button class="nav-btn" onclick="scrollToSection('penalty-game')">⚽ Penalty</button>
+  <button class="nav-btn" onclick="scrollToSection('trivia-game')">🧠 Trivia</button>
+  <button class="nav-btn" onclick="scrollToSection('wordle-game')">🔤 Wordle</button>
+  <button class="nav-btn" onclick="scrollToSection('bingo-game')">🎯 Bingo</button>
+</nav>
+
+<div class="tifo-stripe"></div>
+
+<!-- ══════════════════════════════
+     GAME 1 — PENALTY SHOOTOUT
+══════════════════════════════ -->
+<section class="game-section" id="penalty-game">
+  <div class="section-header">
+    <div class="section-number">01</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Penalty Shootout</div>
+      <div class="section-desc">Score 3 of 5 to advance</div>
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <div>
+      <div class="score-team">YOU</div>
+      <div class="score-num" id="pen-player-score">0</div>
+    </div>
+    <div class="score-sep">—</div>
+    <div>
+      <div class="score-team">GK</div>
+      <div class="score-num" id="pen-gk-score">0</div>
+    </div>
+  </div>
+
+  <div class="kick-indicators" id="pen-kicks"></div>
+  <div class="penalty-status" id="pen-status">Pick your spot — tap a zone to shoot!</div>
+
+  <div class="goal-container">
+    <div class="goal-frame" id="goal-frame">
+      <div class="goal-net"></div>
+      <div class="goal-zones" id="goal-zones">
+        <div class="zone" data-zone="top-left" onclick="shoot(this)"><span class="zone-label">Top L</span></div>
+        <div class="zone" data-zone="top-center" onclick="shoot(this)"><span class="zone-label">Top C</span></div>
+        <div class="zone" data-zone="top-right" onclick="shoot(this)"><span class="zone-label">Top R</span></div>
+        <div class="zone" data-zone="bot-left" onclick="shoot(this)"><span class="zone-label">Bot L</span></div>
+        <div class="zone" data-zone="bot-center" onclick="shoot(this)"><span class="zone-label">Bot C</span></div>
+        <div class="zone" data-zone="bot-right" onclick="shoot(this)"><span class="zone-label">Bot R</span></div>
+      </div>
+      <div class="goal-flash" id="goal-flash"></div>
+      <div class="miss-flash" id="miss-flash"></div>
+      <div class="goal-post-h"></div>
+    </div>
+    <div class="ball" id="penalty-ball"></div>
+  </div>
+
+  <button class="btn btn-red btn-full" id="pen-restart-btn" onclick="initPenalty()" style="display:none;">⚽ Play Again</button>
+</section>
+
+<div class="tifo-stripe"></div>
+
+<!-- ══════════════════════════════
+     GAME 2 — TRIVIA QUIZ
+══════════════════════════════ -->
+<section class="game-section" id="trivia-game">
+  <div class="section-header">
+    <div class="section-number">02</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Trivia Quiz</div>
+      <div class="section-desc">World Cup 2026 Knowledge</div>
+    </div>
+  </div>
+
+  <div class="quiz-progress" id="quiz-progress"></div>
+  <div class="quiz-meta">
+    <div class="quiz-cat" id="quiz-cat">History</div>
+    <div class="quiz-score-display">Score: <span id="quiz-score">0</span></div>
+  </div>
+  <div class="quiz-question" id="quiz-question">Loading question...</div>
+  <div class="quiz-options" id="quiz-options"></div>
+  <div class="quiz-feedback" id="quiz-feedback"></div>
+  <button class="btn btn-gold btn-full" id="quiz-next-btn" onclick="nextQuestion()" style="display:none;">Next Question →</button>
+</section>
+
+<div class="tifo-stripe"></div>
+
+<!-- ══════════════════════════════
+     GAME 3 — PLAYER WORDLE
+══════════════════════════════ -->
+<section class="game-section" id="wordle-game">
+  <div class="section-header">
+    <div class="section-number">03</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Who Am I?</div>
+      <div class="section-desc">Guess the WC 2026 player — 6 tries</div>
+    </div>
+  </div>
+
+  <div class="wordle-clues" id="wordle-clues">
+    <div class="clue-item"><div class="clue-label">Nation</div><div class="clue-val" id="wc-nation">—</div></div>
+    <div class="clue-item"><div class="clue-label">Position</div><div class="clue-val" id="wc-pos">—</div></div>
+    <div class="clue-item"><div class="clue-label">Club</div><div class="clue-val" id="wc-club">—</div></div>
+    <div class="clue-item"><div class="clue-label">Caps</div><div class="clue-val" id="wc-caps">—</div></div>
+  </div>
+
+  <div class="wordle-msg" id="wordle-msg"></div>
+  <div class="wordle-guesses" id="wordle-guesses"></div>
+
+  <div class="wordle-input-row">
+    <input class="wordle-input" id="wordle-input" type="text" maxlength="20" placeholder="TYPE NAME..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn btn-white" onclick="submitWordle()">GO</button>
+  </div>
+
+  <div class="wordle-keyboard" id="wordle-keyboard"></div>
+
+  <button class="btn btn-red btn-full mt-1" id="wordle-restart" onclick="initWordle()" style="display:none;">🔄 New Player</button>
+</section>
+
+<div class="tifo-stripe"></div>
+
+<!-- ══════════════════════════════
+     GAME 4 — MATCH BINGO
+══════════════════════════════ -->
+<section class="game-section" id="bingo-game">
+  <div class="section-header">
+    <div class="section-number">04</div>
+    <div class="section-title-wrap">
+      <div class="section-title">Match Bingo</div>
+      <div class="section-desc">Tap when it happens live</div>
+    </div>
+  </div>
+
+  <div class="bingo-marked-count">
+    <span>Events marked</span>
+    <span><span class="marked-count-num" id="bingo-count">0</span> / 25</span>
+  </div>
+
+  <div class="bingo-status" id="bingo-status">Tap events as they happen in the match!</div>
+
+  <div class="bingo-card">
+    <div class="bingo-header">
+      <div class="bingo-col-head">B</div>
+      <div class="bingo-col-head">I</div>
+      <div class="bingo-col-head">N</div>
+      <div class="bingo-col-head">G</div>
+      <div class="bingo-col-head">O</div>
+    </div>
+    <div class="bingo-grid" id="bingo-grid"></div>
+  </div>
+
+  <div class="tifo-divider"></div>
+  <button class="btn btn-red btn-full" onclick="initBingo()">🎯 New Card</button>
+</section>
+
+<div class="tifo-stripe"></div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>WC2026 SUPPORTER GAMES</strong><br>
+  USA · Canada · Mexico — June–July 2026<br>
+  <span class="flare-deco">🔥</span> Built for the terraces. No mercy. No surrender. <span class="flare-deco">🔥</span>
+</footer>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-box">
+    <div class="result-title" id="result-title">GOAL!</div>
+    <div class="result-sub" id="result-sub"></div>
+    <button class="btn btn-gold btn-full mt-2" onclick="closeResult()">Close</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// UTILITY
+// ─────────────────────────────────────────────
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeResult() {
+  document.getElementById('result-overlay').classList.remove('show');
+}
+function showResult(title, sub) {
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-overlay').classList.add('show');
+}
+function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ─────────────────────────────────────────────
+// GAME 1 — PENALTY SHOOTOUT
+// ─────────────────────────────────────────────
+let penState = {};
+
+const gkSaveRates = {
+  'top-left': 0.18, 'top-center': 0.30, 'top-right': 0.18,
+  'bot-left': 0.28, 'bot-center': 0.45, 'bot-right': 0.28
+};
+
+const penMessages = {
+  goal: ["GOOOAL! 🔥", "NET BUSTER! 💥", "TOP BINS! 🎯", "UNSTOPPABLE!", "WORLD CLASS!"],
+  miss: ["SAVED! 🧤", "Off the post!", "KEEPER WINS!", "Not today!", "Inches wide..."],
+};
+
+function initPenalty() {
+  penState = { playerScore: 0, gkScore: 0, kick: 0, total: 5, done: false, kicks: [] };
+  document.getElementById('pen-player-score').textContent = '0';
+  document.getElementById('pen-gk-score').textContent = '0';
+  document.getElementById('pen-status').textContent = 'Pick your spot — tap a zone to shoot!';
+  document.getElementById('pen-restart-btn').style.display = 'none';
+  document.getElementById('goal-zones').style.pointerEvents = 'auto';
+  document.getElementById('penalty-ball').style.cssText = '';
+  renderPenKicks();
+}
+
+function renderPenKicks() {
+  const c = document.getElementById('pen-kicks');
+  c.innerHTML = '';
+  for (let i = 0; i < penState.total; i++) {
+    const d = document.createElement('div');
+    d.className = 'kick-dot' + (penState.kicks[i] === 'goal' ? ' goal' : penState.kicks[i] === 'miss' ? ' miss' : i === penState.kick && !penState.done ? ' current' : '');
+    d.textContent = penState.kicks[i] === 'goal' ? '⚽' : penState.kicks[i] === 'miss' ? '✗' : '';
+    c.appendChild(d);
+  }
+}
+
+function shoot(zoneEl) {
+  if (penState.done) return;
+  const zone = zoneEl.dataset.zone;
+  const saves = gkSaveRates[zone];
+  const saved = Math.random() < saves;
+  const ball = document.getElementById('penalty-ball');
+
+  // Animate ball
+  const zoneRect = zoneEl.getBoundingClientRect();
+  const frameRect = document.getElementById('goal-frame').getBoundingClientRect();
+  const tx = (zoneRect.left + zoneRect.width / 2) - (frameRect.left + frameRect.width / 2);
+  const ty = -(frameRect.height * (zone.startsWith('top') ? 0.25 : 0.7));
+
+  ball.style.transition = 'all 0.35s cubic-bezier(0.4,0,0.2,1)';
+  ball.style.transform = `translateX(calc(-50% + ${tx}px))`;
+  ball.style.bottom = `${Math.abs(ty)}px`;
+  ball.style.width = '16px'; ball.style.height = '16px';
+
+  document.getElementById('goal-zones').style.pointerEvents = 'none';
+
+  setTimeout(() => {
+    if (!saved) {
+      penState.playerScore++;
+      penState.kicks[penState.kick] = 'goal';
+      document.getElementById('pen-player-score').textContent = penState.playerScore;
+      document.getElementById('pen-status').textContent = rand(penMessages.goal);
+      const gf = document.getElementById('goal-flash');
+      gf.classList.add('show');
+      setTimeout(() => gf.classList.remove('show'), 400);
+    } else {
+      penState.gkScore++;
+      penState.kicks[penState.kick] = 'miss';
+      document.getElementById('pen-gk-score').textContent = penState.gkScore;
+      document.getElementById('pen-status').textContent = rand(penMessages.miss);
+      const mf = document.getElementById('miss-flash');
+      mf.classList.add('show');
+      setTimeout(() => mf.classList.remove('show'), 400);
+    }
+
+    penState.kick++;
+    renderPenKicks();
+
+    setTimeout(() => {
+      ball.style.transition = 'none';
+      ball.style.transform = 'translateX(-50%)';
+      ball.style.bottom = '-20px';
+      ball.style.width = '28px'; ball.style.height = '28px';
+
+      if (penState.kick >= penState.total) {
+        penState.done = true;
+        document.getElementById('pen-restart-btn').style.display = 'block';
+        const won = penState.playerScore >= 3;
+        document.getElementById('pen-status').textContent = won
+          ? `YOU WIN! ${penState.playerScore}-${penState.gkScore} 🏆`
+          : `ELIMINATED! ${penState.playerScore}-${penState.gkScore} 😢`;
+        setTimeout(() => showResult(
+          won ? '⚽ WINNER!' : '😢 OUT!',
+          `Final: ${penState.playerScore} – ${penState.gkScore} vs. Goalkeeper`
+        ), 600);
+      } else {
+        document.getElementById('goal-zones').style.pointerEvents = 'auto';
+        document.getElementById('pen-status').textContent = `Kick ${penState.kick + 1} of ${penState.total} — choose your zone!`;
+      }
+    }, 800);
+  }, 400);
+}
+
+// ─────────────────────────────────────────────
+// GAME 2 — TRIVIA QUIZ
+// ─────────────────────────────────────────────
+const TRIVIA = [
+  { cat: 'History', q: 'Which country won the first ever FIFA World Cup in 1930?', a: 'Uruguay', opts: ['Brazil', 'Argentina', 'Uruguay', 'Italy'] },
+  { cat: 'Records', q: 'Who is the all-time top scorer in World Cup history?', a: 'Miroslav Klose', opts: ['Ronaldo', 'Miroslav Klose', 'Pelé', 'Gerd Müller'] },
+  { cat: 'WC 2026', q: 'How many teams will participate in World Cup 2026 for the first time in history?', a: '48', opts: ['32', '40', '48', '64'] },
+  { cat: 'WC 2026', q: 'Which three countries are co-hosting the 2026 World Cup?', a: 'USA, Canada & Mexico', opts: ['USA, Canada & Mexico', 'USA, Mexico & Brazil', 'Canada, USA & Colombia', 'Mexico, USA & Argentina'] },
+  { cat: 'History', q: 'Which nation has won the most World Cup titles?', a: 'Brazil (5)', opts: ['Germany (4)', 'Italy (4)', 'Brazil (5)', 'Argentina (3)'] },
+  { cat: 'Players', q: 'Lionel Messi won his first World Cup with Argentina in which year?', a: '2022', opts: ['2014', '2018', '2022', '2026'] },
+  { cat: 'History', q: 'The legendary "Hand of God" goal was scored by which player?', a: 'Diego Maradona', opts: ['Pelé', 'Diego Maradona', 'Ronaldo', 'Zidane'] },
+  { cat: 'WC 2026', q: 'Which city will host the 2026 World Cup Final?', a: 'New York/New Jersey', opts: ['Los Angeles', 'Dallas', 'New York/New Jersey', 'Mexico City'] },
+  { cat: 'Records', q: 'Which goalkeeper holds the record for most World Cup clean sheets?', a: 'Peter Shilton', opts: ['Oliver Kahn', 'Gianluigi Buffon', 'Peter Shilton', 'Iker Casillas'] },
+  { cat: 'History', q: 'In which year did France win their first World Cup on home soil?', a: '1998', opts: ['1994', '1998', '2002', '2006'] },
+  { cat: 'Records', q: 'Who scored the fastest goal in World Cup history (11 seconds)?', a: 'Hakan Şükür', opts: ['Robbie Fowler', 'Hakan Şükür', 'Ronaldo', 'Inamoto'] },
+  { cat: 'Players', q: 'Cristiano Ronaldo has appeared in how many World Cup tournaments (as of 2022)?', a: '5', opts: ['3', '4', '5', '6'] },
+  { cat: 'History', q: 'Which World Cup final ended 3-2 and is considered by many the greatest final ever?', a: 'Hungary vs West Germany 1954', opts: ['Brazil vs Sweden 1958', 'Hungary vs West Germany 1954', 'Italy vs West Germany 1970', 'France vs Brazil 1998'] },
+  { cat: 'WC 2026', q: 'How many group stage matches will be played in WC 2026 compared to WC 2022?', a: 'More — 96 vs 64', opts: ['Same — 64', 'More — 80 vs 64', 'More — 96 vs 64', 'Fewer — 48 vs 64'] },
+  { cat: 'Players', q: 'Who won the Golden Boot (top scorer) at the 2022 World Cup?', a: 'Kylian Mbappé', opts: ['Lionel Messi', 'Kylian Mbappé', 'Olivier Giroud', 'Bukayo Saka'] },
+];
+
+let triviaState = {};
+
+function initTrivia() {
+  const shuffled = [...TRIVIA].sort(() => Math.random() - 0.5).slice(0, 10);
+  triviaState = { questions: shuffled, current: 0, score: 0, answered: [] };
+  document.getElementById('quiz-score').textContent = '0';
+  renderQuizProgress();
+  loadQuestion();
+}
+
+function renderQuizProgress() {
+  const c = document.getElementById('quiz-progress');
+  c.innerHTML = '';
+  for (let i = 0; i < triviaState.questions.length; i++) {
+    const p = document.createElement('div');
+    p.className = 'q-pip' + (triviaState.answered[i] === 'correct' ? ' done' : triviaState.answered[i] === 'wrong' ? ' wrong' : i === triviaState.current ? ' current' : '');
+    c.appendChild(p);
+  }
+}
+
+function loadQuestion() {
+  const q = triviaState.questions[triviaState.current];
+  if (!q) { endQuiz(); return; }
+  document.getElementById('quiz-cat').textContent = q.cat;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-next-btn').style.display = 'none';
+
+  const opts = [...q.opts].sort(() => Math.random() - 0.5);
+  const c = document.getElementById('quiz-options');
+  c.innerHTML = '';
+  opts.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'quiz-opt';
+    b.textContent = opt;
+    b.onclick = () => answerQuiz(opt, b, q.a);
+    c.appendChild(b);
+  });
+}
+
+function answerQuiz(chosen, btn, correct) {
+  const isCorrect = chosen === correct;
+  document.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    if (b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  if (isCorrect) {
+    triviaState.score++;
+    triviaState.answered[triviaState.current] = 'correct';
+    document.getElementById('quiz-score').textContent = triviaState.score;
+    document.getElementById('quiz-feedback').textContent = rand(['Correct! ⚡', 'Brilliant! 🔥', 'On target! 🎯', 'World class knowledge! 🏆']);
+  } else {
+    triviaState.answered[triviaState.current] = 'wrong';
+    document.getElementById('quiz-feedback').textContent = `❌ Correct answer: ${correct}`;
+  }
+
+  renderQuizProgress();
+  triviaState.current++;
+
+  if (triviaState.current < triviaState.questions.length) {
+    document.getElementById('quiz-next-btn').style.display = 'block';
+  } else {
+    setTimeout(endQuiz, 1200);
+  }
+}
+
+function nextQuestion() {
+  document.getElementById('quiz-next-btn').style.display = 'none';
+  loadQuestion();
+  renderQuizProgress();
+}
+
+function endQuiz() {
+  const s = triviaState.score;
+  const t = triviaState.questions.length;
+  const pct = Math.round((s / t) * 100);
+  const grade = pct >= 80 ? '🏆 Ultra Expert!' : pct >= 60 ? '⚡ Solid Fan' : pct >= 40 ? '📺 Casual Viewer' : '😅 Study up, mate';
+  document.getElementById('quiz-question').textContent = `Final Score: ${s} / ${t} — ${grade}`;
+  document.getElementById('quiz-options').innerHTML = `<button class="btn btn-red btn-full" style="grid-column:span 2" onclick="initTrivia()">🔄 Play Again</button>`;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-next-btn').style.display = 'none';
+  renderQuizProgress();
+}
+
+// ─────────────────────────────────────────────
+// GAME 3 — PLAYER WORDLE
+// ─────────────────────────────────────────────
+const PLAYERS = [
+  { name: 'MBAPPE',   nation: '🇫🇷 France',   pos: 'Forward',    club: 'Real Madrid',   caps: '80+' },
+  { name: 'MESSI',    nation: '🇦🇷 Argentina', pos: 'Forward',    club: 'Inter Miami',   caps: '180+' },
+  { name: 'VINICIUS', nation: '🇧🇷 Brazil',    pos: 'Forward',    club: 'Real Madrid',   caps: '30+' },
+  { name: 'BELLINGHAM',nation:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', pos: 'Midfielder', club: 'Real Madrid',   caps: '30+' },
+  { name: 'SALAH',    nation: '🇪🇬 Egypt',     pos: 'Forward',    club: 'Liverpool',     caps: '90+' },
+  { name: 'HAALAND',  nation: '🇳🇴 Norway',    pos: 'Striker',    club: 'Man City',      caps: '30+' },
+  { name: 'PEDRI',    nation: '🇪🇸 Spain',     pos: 'Midfielder', club: 'Barcelona',     caps: '30+' },
+  { name: 'SAKA',     nation: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', pos: 'Forward',    club: 'Arsenal',       caps: '40+' },
+  { name: 'MODRIC',   nation: '🇭🇷 Croatia',   pos: 'Midfielder', club: 'Real Madrid',   caps: '170+' },
+  { name: 'KANE',     nation: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', pos: 'Striker',    club: 'Bayern Munich', caps: '90+' },
+  { name: 'OSIMHEN',  nation: '🇳🇬 Nigeria',   pos: 'Striker',    club: 'Galatasaray',   caps: '30+' },
+  { name: 'YAMAL',    nation: '🇪🇸 Spain',     pos: 'Forward',    club: 'Barcelona',     caps: '20+' },
+  { name: 'MARTINEZ', nation: '🇦🇷 Argentina', pos: 'Goalkeeper', club: 'Aston Villa',   caps: '50+' },
+  { name: 'RICE',     nation: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', pos: 'Midfielder', club: 'Arsenal',       caps: '50+' },
+  { name: 'GAVI',     nation: '🇪🇸 Spain',     pos: 'Midfielder', club: 'Barcelona',     caps: '40+' },
+];
+
+let wordleState = {};
+
+const KB_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['⌫', 'Z','X','C','V','B','N','M','↵']
+];
+
+function initWordle() {
+  const player = rand(PLAYERS);
+  wordleState = {
+    answer: player.name,
+    player,
+    guesses: [],
+    maxGuesses: 6,
+    done: false,
+    keyStatus: {}
+  };
+
+  // Reveal clues progressively
+  document.getElementById('wc-nation').textContent = player.nation;
+  document.getElementById('wc-pos').textContent = player.pos;
+  document.getElementById('wc-club').textContent = '???';
+  document.getElementById('wc-caps').textContent = '???';
+
+  document.getElementById('wordle-msg').textContent = `Guess the player name (${player.name.length} letters)`;
+  document.getElementById('wordle-input').value = '';
+  document.getElementById('wordle-restart').style.display = 'none';
+  renderWordleGuesses();
+  renderKeyboard();
+}
+
+function renderWordleGuesses() {
+  const c = document.getElementById('wordle-guesses');
+  c.innerHTML = '';
+  const answer = wordleState.answer;
+  const len = answer.length;
+  const rows = Math.max(wordleState.maxGuesses, wordleState.guesses.length);
+
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'guess-row';
+    const guess = wordleState.guesses[r] || '';
+
+    for (let i = 0; i < len; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'guess-letter';
+      cell.textContent = guess[i] || '';
+
+      if (guess) {
+        if (guess[i] === answer[i]) {
+          cell.classList.add('correct');
+        } else if (answer.includes(guess[i])) {
+          cell.classList.add('partial');
+        } else if (guess[i]) {
+          cell.classList.add('wrong-letter');
+        }
+      }
+      row.appendChild(cell);
+    }
+    c.appendChild(row);
+  }
+}
+
+function renderKeyboard() {
+  const c = document.getElementById('wordle-keyboard');
+  c.innerHTML = '';
+  KB_ROWS.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'kb-row';
+    row.forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'kb-key' + (key.length > 1 ? ' wide' : '');
+      btn.textContent = key;
+      const status = wordleState.keyStatus[key];
+      if (status) btn.classList.add(status);
+      btn.onclick = () => handleKbKey(key);
+      rowEl.appendChild(btn);
+    });
+    c.appendChild(rowEl);
+  });
+}
+
+function handleKbKey(key) {
+  if (wordleState.done) return;
+  const inp = document.getElementById('wordle-input');
+  if (key === '⌫') {
+    inp.value = inp.value.slice(0, -1);
+  } else if (key === '↵') {
+    submitWordle();
+  } else {
+    if (inp.value.length < wordleState.answer.length) {
+      inp.value += key;
+    }
+  }
+}
+
+function submitWordle() {
+  if (wordleState.done) return;
+  const inp = document.getElementById('wordle-input');
+  const guess = inp.value.toUpperCase().replace(/[^A-Z]/g, '');
+  const answer = wordleState.answer;
+
+  if (guess.length !== answer.length) {
+    inp.classList.add('shake');
+    setTimeout(() => inp.classList.remove('shake'), 400);
+    document.getElementById('wordle-msg').textContent = `Name must be ${answer.length} letters!`;
+    return;
+  }
+
+  wordleState.guesses.push(guess);
+  inp.value = '';
+
+  // Update key statuses
+  for (let i = 0; i < guess.length; i++) {
+    const letter = guess[i];
+    const existing = wordleState.keyStatus[letter];
+    if (guess[i] === answer[i]) {
+      wordleState.keyStatus[letter] = 'correct';
+    } else if (answer.includes(letter) && existing !== 'correct') {
+      wordleState.keyStatus[letter] = 'partial';
+    } else if (!existing) {
+      wordleState.keyStatus[letter] = 'wrong-key';
+    }
+  }
+
+  // Reveal clues at guesses 2 and 4
+  if (wordleState.guesses.length === 2) {
+    document.getElementById('wc-club').textContent = wordleState.player.club;
+  }
+  if (wordleState.guesses.length === 4) {
+    document.getElementById('wc-caps').textContent = wordleState.player.caps;
+  }
+
+  renderWordleGuesses();
+  renderKeyboard();
+
+  if (guess === answer) {
+    wordleState.done = true;
+    document.getElementById('wordle-msg').textContent = `🔥 YES! ${answer} in ${wordleState.guesses.length} tries!`;
+    document.getElementById('wordle-restart').style.display = 'block';
+    setTimeout(() => showResult('⚡ GOT IT!', `${answer} — found in ${wordleState.guesses.length} guess${wordleState.guesses.length > 1 ? 'es' : ''}!`), 400);
+  } else if (wordleState.guesses.length >= wordleState.maxGuesses) {
+    wordleState.done = true;
+    document.getElementById('wordle-msg').textContent = `Answer: ${answer}`;
+    document.getElementById('wordle-restart').style.display = 'block';
+  } else {
+    const left = wordleState.maxGuesses - wordleState.guesses.length;
+    document.getElementById('wordle-msg').textContent = `${left} attempt${left !== 1 ? 's' : ''} remaining`;
+  }
+}
+
+// ─────────────────────────────────────────────
+// GAME 4 — MATCH BINGO
+// ─────────────────────────────────────────────
+const BINGO_EVENTS = [
+  'GOAL!', 'Red Card', 'Yellow Card', 'Penalty Awarded', 'VAR Review',
+  'Hat-Trick', 'Own Goal', 'Free Kick Goal', 'Corner Kick', 'Offside Flag',
+  'Injury Stop', 'Sub Made', 'Post Hit', 'Keeper Save', 'Header Goal',
+  'Long Range Shot', 'Diving Claim', '6 Mins Stoppage', 'Crowd Wave', 'Fast Break',
+  'Captain Booking', 'Penalty Miss', 'Injury Time Goal', 'Goalie Up Corner', 'Brace Scored',
+  'Clean Sheet', 'Goal Disallowed', 'Nutmeg', 'Bicycle Kick', 'Overhead Save',
+  'Goal Line Clearance', 'Keeper Penalty Save', 'Counter Attack Goal', 'Free-Kick Wall', 'Tap-In Goal',
+  'Brace in 1st Half', 'Last Minute Winner', 'Debut Goal', '2 Yellows = Red', 'Throw-In Goal',
+  'Panenka', 'Scorpion Kick', 'Chip Keeper', 'Crossbar Hit', '4+ Goals in Game'
+];
+
+let bingoState = {};
+
+function initBingo() {
+  const shuffled = [...BINGO_EVENTS].sort(() => Math.random() - 0.5).slice(0, 24);
+  // Insert FREE space in middle (index 12)
+  shuffled.splice(12, 0, 'FREE');
+  bingoState = { cells: shuffled, marked: new Array(25).fill(false), bingos: new Set() };
+  bingoState.marked[12] = true; // FREE is auto-marked
+  document.getElementById('bingo-status').textContent = 'Tap events as they happen in the match!';
+  document.getElementById('bingo-count').textContent = '1';
+  renderBingo();
+}
+
+function renderBingo() {
+  const c = document.getElementById('bingo-grid');
+  c.innerHTML = '';
+  bingoState.cells.forEach((text, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'bingo-cell' + (bingoState.marked[i] ? (text === 'FREE' ? ' free' : ' marked') : '') + (bingoState.bingos.has(i) ? ' bingo-line' : '');
+    cell.textContent = text;
+    if (text !== 'FREE') cell.onclick = () => toggleBingo(i);
+    c.appendChild(cell);
+  });
+}
+
+function toggleBingo(idx) {
+  bingoState.marked[idx] = !bingoState.marked[idx];
+  const total = bingoState.marked.filter(Boolean).length;
+  document.getElementById('bingo-count').textContent = total;
+  checkBingo();
+  renderBingo();
+}
+
+function checkBingo() {
+  const m = bingoState.marked;
+  const prev = bingoState.bingos.size;
+  bingoState.bingos = new Set();
+
+  // Rows
+  for (let r = 0; r < 5; r++) {
+    if ([0,1,2,3,4].every(c => m[r*5+c])) [0,1,2,3,4].forEach(c => bingoState.bingos.add(r*5+c));
+  }
+  // Cols
+  for (let c = 0; c < 5; c++) {
+    if ([0,1,2,3,4].every(r => m[r*5+c])) [0,1,2,3,4].forEach(r => bingoState.bingos.add(r*5+c));
+  }
+  // Diagonals
+  if ([0,6,12,18,24].every(i => m[i])) [0,6,12,18,24].forEach(i => bingoState.bingos.add(i));
+  if ([4,8,12,16,20].every(i => m[i])) [4,8,12,16,20].forEach(i => bingoState.bingos.add(i));
+
+  if (bingoState.bingos.size > 0 && bingoState.bingos.size !== prev) {
+    const count = new Set([...bingoState.bingos].map(i => {
+      // rough line count
+    })).size || 1;
+    document.getElementById('bingo-status').textContent = '🎉 BINGO! Line complete!';
+    if (prev === 0) setTimeout(() => showResult('🎯 BINGO!', 'You got a line! Keep going for more!'), 300);
+  } else if (bingoState.bingos.size === 0) {
+    document.getElementById('bingo-status').textContent = 'Tap events as they happen in the match!';
+  }
+}
+
+// ─────────────────────────────────────────────
+// INIT ALL GAMES
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initPenalty();
+  initTrivia();
+  initWordle();
+  initBingo();
+
+  // Wordle input enter key
+  document.getElementById('wordle-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitWordle();
+  });
+});
+</script>
+</body>
+</html>
