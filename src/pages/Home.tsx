@@ -6,50 +6,69 @@ interface HomeProps {
   onPlay: () => void;
 }
 
-/* ─── tiny helpers ─────────────────────────────────────────── */
-function Tag({ children }: { children: ReactNode }) {
+/* ─────────────────────────────────────────────────────────
+   Scroll progress bar
+───────────────────────────────────────────────────────── */
+function ProgressBar() {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    const fn = () => {
+      const el = document.documentElement;
+      setPct((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+    };
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
   return (
-    <span className="kf-tag">{children}</span>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="kf-section-title">{children}</h2>
-  );
-}
-
-function Card({ children, glow = false }: { children: ReactNode; glow?: boolean }) {
-  return (
-    <div className={glow ? "kf-card kf-card--glow" : "kf-card"}>
-      {children}
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, height: 3, zIndex: 200,
+      background: "rgba(255,255,255,0.06)",
+    }}>
+      <div style={{
+        height: "100%", width: `${pct}%`,
+        background: "linear-gradient(90deg,#16a34a,#4ade80)",
+        transition: "width 0.08s linear",
+        boxShadow: "0 0 8px rgba(74,222,128,0.7)",
+      }} />
     </div>
   );
 }
 
+/* ─────────────────────────────────────────────────────────
+   Tiny reusables
+───────────────────────────────────────────────────────── */
+function Tag({ children }: { children: ReactNode }) {
+  return <span className="kf-tag">{children}</span>;
+}
+function SectionTitle({ children }: { children: ReactNode }) {
+  return <h2 className="kf-section-title">{children}</h2>;
+}
+function Card({ children, glow = false }: { children: ReactNode; glow?: boolean }) {
+  return <div className={`kf-card${glow ? " kf-card--glow" : ""}`}>{children}</div>;
+}
 function Divider() {
   return <div className="kf-divider" />;
 }
 
-/* ─── main component ────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   Main
+───────────────────────────────────────────────────────── */
 export default function Home({ onPlay }: HomeProps) {
-  const [scrolled, setScrolled]   = useState(false);
-  const [menuOpen, setMenuOpen]   = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [menuOpen,  setMenuOpen]  = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", fn);
+    const fn = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // close menu on outside click
-  const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!menuOpen) return;
     const fn = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
         setMenuOpen(false);
-      }
     };
     document.addEventListener("mousedown", fn);
     return () => document.removeEventListener("mousedown", fn);
@@ -60,114 +79,112 @@ export default function Home({ onPlay }: HomeProps) {
     setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 50);
   };
 
-  const NAV_LINKS = [
-    { label: "About",        id: "about" },
-    { label: "How It Works", id: "how-it-works" },
-    { label: "Ratings",      id: "ratings" },
+  const NAV = [
+    { label: "Gameplay", id: "gameplay" },
+    { label: "How to Play", id: "how-to-play" },
+    { label: "Ratings",  id: "ratings" },
   ];
 
   return (
     <div className="kf-root">
+      <ProgressBar />
 
       {/* ══════════════════════════════════════
           NAV
       ══════════════════════════════════════ */}
       <nav className={`kf-nav${scrolled ? " kf-nav--scrolled" : ""}`} ref={menuRef}>
         <div className="kf-nav-inner">
-          {/* Logo */}
           <Logo size="sm" />
 
-          {/* Desktop links */}
           <div className="kf-nav-links">
-            {NAV_LINKS.map(l => (
+            {NAV.map(l => (
               <button key={l.id} className="kf-nav-link" onClick={() => go(l.id)}>
                 {l.label}
               </button>
             ))}
           </div>
 
-          {/* Right side */}
           <div className="kf-nav-right">
-            <button className="kf-btn-play kf-btn-play--sm" onClick={onPlay}>
-              Play Free
-            </button>
-            {/* Hamburger */}
+            <button className="kf-btn kf-btn--sm" onClick={onPlay}>Play Free</button>
             <button
               className={`kf-hamburger${menuOpen ? " kf-hamburger--open" : ""}`}
               onClick={() => setMenuOpen(v => !v)}
-              aria-label="Toggle menu"
+              aria-label="Menu"
             >
               <span /><span /><span />
             </button>
           </div>
         </div>
 
-        {/* Mobile drawer */}
-        <div className={`kf-mobile-menu${menuOpen ? " kf-mobile-menu--open" : ""}`}>
-          {NAV_LINKS.map(l => (
-            <button key={l.id} className="kf-mobile-link" onClick={() => go(l.id)}>
+        <div className={`kf-drawer${menuOpen ? " kf-drawer--open" : ""}`}>
+          {NAV.map(l => (
+            <button key={l.id} className="kf-drawer-link" onClick={() => go(l.id)}>
               {l.label}
             </button>
           ))}
-          <button className="kf-btn-play kf-btn-play--full" onClick={() => { setMenuOpen(false); onPlay(); }}>
+          <button className="kf-btn kf-btn--full" style={{ marginTop: 8 }}
+            onClick={() => { setMenuOpen(false); onPlay(); }}>
             ▶ Play Free Now
           </button>
         </div>
       </nav>
 
       {/* ══════════════════════════════════════
-          HERO
+          HERO — no logo repeat, visceral copy
       ══════════════════════════════════════ */}
       <section className="kf-hero">
-        {/* bg glows */}
-        <div className="kf-hero-glow" />
+        <div className="kf-hero-bg" />
         <div className="kf-hero-fade" />
-        {/* floodlights */}
-        <div className="kf-floodlight kf-floodlight--left" />
-        <div className="kf-floodlight kf-floodlight--right" />
+        <div className="kf-floodlight kf-floodlight--l" />
+        <div className="kf-floodlight kf-floodlight--r" />
 
-        <div className="kf-hero-content">
-          <div className="kf-hero-logo">
-            <Logo size="xl" />
-          </div>
+        <div className="kf-hero-inner">
 
-          <span className="kf-badge">Free to Play in Your Browser</span>
+          {/* Pill */}
+          <span className="kf-pill">Free · In-browser · No account</span>
 
-          <h1 className="kf-hero-title">
-            The Ultimate{" "}
-            <span className="kf-green">Penalty Kick</span>{" "}
-            Experience
+          {/* Headline */}
+          <h1 className="kf-hero-h1">
+            5 kicks.<br />
+            One&nbsp;chance.<br />
+            <span className="kf-green">No&nbsp;excuses.</span>
           </h1>
 
+          {/* Sub */}
           <p className="kf-hero-sub">
-            Step up to the spot. Pick your corner. Beat the goalkeeper.
-            No downloads, no sign-ups. Pure football skill in your browser.
+            Pick your corner. Read the keeper's dive. Click.
+            <br className="kf-br-hide" />
+            The stadium's watching. World Cup 2026 awaits.
           </p>
 
-          <button className="kf-btn-play kf-btn-play--hero" onClick={onPlay}>
-            PLAY FREE NOW
+          <button className="kf-btn kf-btn--hero" onClick={onPlay}>
+            Take the penalty
           </button>
-          <p className="kf-hero-note">No account needed · Instant play · 100% free</p>
-        </div>
 
-        {/* Stats */}
-        <div className="kf-stats">
-          {[
-            { v: "5", l: "Kicks" },
-            { v: "AI", l: "Goalkeeper" },
-            { v: "0s", l: "Load Time" },
-          ].map(s => (
-            <div key={s.l} className="kf-stat">
-              <div className="kf-stat-val">{s.v}</div>
-              <div className="kf-stat-lbl">{s.l}</div>
+          {/* 3 quick truths — not marketing stats */}
+          <div className="kf-truths">
+            <div className="kf-truth">
+              <span className="kf-truth-n">118<span className="kf-truth-unit">ms</span></span>
+              <span className="kf-truth-l">keeper reaction</span>
             </div>
-          ))}
+            <div className="kf-truth-sep" />
+            <div className="kf-truth">
+              <span className="kf-truth-n">64</span>
+              <span className="kf-truth-l">aim zones</span>
+            </div>
+            <div className="kf-truth-sep" />
+            <div className="kf-truth">
+              <span className="kf-truth-n">5</span>
+              <span className="kf-truth-l">kicks per round</span>
+            </div>
+          </div>
         </div>
 
+        {/* scroll hint */}
         <div className="kf-scroll-hint">
-          <span>Scroll to explore</span>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="kf-bounce">
-            <path d="M9 3v11M4 10l5 5 5-5" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="kf-bounce-icon">
+            <path d="M10 4v10M5 11l5 5 5-5" stroke="rgba(255,255,255,0.3)"
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
       </section>
@@ -175,35 +192,45 @@ export default function Home({ onPlay }: HomeProps) {
       <Divider />
 
       {/* ══════════════════════════════════════
-          ABOUT
+          GAMEPLAY — replaces generic "About"
       ══════════════════════════════════════ */}
-      <section id="about" className="kf-section">
-        <Tag>About</Tag>
+      <section id="gameplay" className="kf-section">
+        <Tag>The Game</Tag>
         <SectionTitle>
-          Born for the <span className="kf-gold">Beautiful Game</span>
+          It's just you,<br />the keeper, and the <span className="kf-green">back of the net.</span>
         </SectionTitle>
-        <p className="kf-body-text" style={{ marginBottom: 12 }}>
-          Kickoff 2026 is a free browser penalty kick game built to celebrate the world's most
-          beloved sport. Inspired by the electric atmosphere of international football tournaments,
-          we put you right on the penalty spot inside a floodlit night stadium.
-        </p>
-        <p className="kf-body-text" style={{ marginBottom: 28 }}>
-          Every detail was designed with realism in mind: curved ball physics, intelligent
-          goalkeeper AI, authentic stadium visuals, and instant result feedback. No installs,
-          no accounts, just pure football.
+        <p className="kf-body">
+          Kickoff 2026 puts you on the penalty spot of a floodlit night stadium.
+          The crowd is silent. The keeper is shifting weight. You have one click to decide.
         </p>
 
-        <div className="kf-grid-2">
+        <div className="kf-grid-2" style={{ marginTop: 24 }}>
           {[
-            { icon: "⚽", t: "Realistic Physics",    d: "Ball curves naturally based on where you aim." },
-            { icon: "🧤", t: "Smart Goalkeeper",     d: "The keeper reads your direction and dives to save." },
-            { icon: "🏟️", t: "Stadium Night Match",  d: "Floodlights, crowd atmosphere and pitch markings." },
-            { icon: "🎯", t: "Precision Aiming",     d: "Click anywhere inside the goal to set your target." },
+            {
+              icon: "🎯",
+              t: "Click to aim",
+              d: "Hover over the goal — a crosshair locks on. Click anywhere inside to shoot. No sliders, no meters, no fuss.",
+            },
+            {
+              icon: "🧤",
+              t: "Keeper reads you",
+              d: "The goalkeeper AI tracks your movement history. Predictable shooters get saved. Mix it up.",
+            },
+            {
+              icon: "🌀",
+              t: "Ball curves",
+              d: "Off-center clicks add real curl. A shot to the top corner bends differently than a planted low drive.",
+            },
+            {
+              icon: "🏟️",
+              t: "Night stadium",
+              d: "Floodlights, pitch lines, crowd noise. Feels like you're really there at 90+4.",
+            },
           ].map(f => (
             <Card key={f.t}>
-              <div className="kf-feature-icon">{f.icon}</div>
-              <div className="kf-feature-title">{f.t}</div>
-              <div className="kf-feature-body">{f.d}</div>
+              <div className="kf-feat-icon">{f.icon}</div>
+              <div className="kf-feat-title">{f.t}</div>
+              <div className="kf-feat-body">{f.d}</div>
             </Card>
           ))}
         </div>
@@ -212,39 +239,44 @@ export default function Home({ onPlay }: HomeProps) {
       <Divider />
 
       {/* ══════════════════════════════════════
-          HOW IT WORKS
+          HOW TO PLAY — 3 steps, tight
       ══════════════════════════════════════ */}
-      <section id="how-it-works" className="kf-section">
-        <Tag>How It Works</Tag>
+      <section id="how-to-play" className="kf-section">
+        <Tag>How to Play</Tag>
         <SectionTitle>
-          Score in <span className="kf-green">5 Simple Steps</span>
+          Three moves.<br /><span className="kf-green">That's all it takes.</span>
         </SectionTitle>
 
         <div className="kf-steps">
           {[
-            { n: 1, icon: "▶", t: "Tap Play Free Now",         d: "Jump straight into the game. No sign-up, no loading screen, no waiting." },
-            { n: 2, icon: "👁", t: "Read the Goalkeeper",       d: "Watch the keeper shift his weight and decide which corner to target." },
-            { n: 3, icon: "🎯", t: "Move Into the Goal Area",   d: "A yellow crosshair appears when you hover over the goal. That is your aim point." },
-            { n: 4, icon: "🖱", t: "Click to Shoot",            d: "Click your chosen spot inside the goal. The ball launches with realistic curve and pace." },
-            { n: 5, icon: "🏆", t: "Complete 5 Penalties",      d: "Score as many as you can to earn your final rating from Need Practice to Outstanding." },
+            {
+              n: "01",
+              t: "Tap Play Free",
+              d: "No account, no download, no ad wall. You're live in under a second.",
+            },
+            {
+              n: "02",
+              t: "Hover → click to shoot",
+              d: "Move your cursor over the goal. A crosshair appears. Click your spot. That's your kick.",
+            },
+            {
+              n: "03",
+              t: "Score 5, get rated",
+              d: "5 penalties per session. Every goal counts. Every miss hurts. See where you rank.",
+            },
           ].map(s => (
-            <Card key={s.n} glow>
-              <div className="kf-step-row">
-                <div className="kf-step-num">{s.n}</div>
-                <div>
-                  <div className="kf-step-head">
-                    <span className="kf-step-icon">{s.icon}</span>
-                    <span className="kf-step-title">{s.t}</span>
-                  </div>
-                  <p className="kf-step-body">{s.d}</p>
-                </div>
+            <div key={s.n} className="kf-step">
+              <div className="kf-step-n">{s.n}</div>
+              <div>
+                <div className="kf-step-t">{s.t}</div>
+                <div className="kf-step-d">{s.d}</div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
 
-        <button className="kf-btn-play kf-btn-play--full" style={{ marginTop: 8 }} onClick={onPlay}>
-          Try It Now
+        <button className="kf-btn kf-btn--full" style={{ marginTop: 24 }} onClick={onPlay}>
+          Try it now — it's free
         </button>
       </section>
 
@@ -256,116 +288,52 @@ export default function Home({ onPlay }: HomeProps) {
       <section id="ratings" className="kf-section">
         <Tag>Your Rating</Tag>
         <SectionTitle>
-          Can You Get <span className="kf-gold">Outstanding?</span>
+          Where do you <span className="kf-gold">actually</span> rank?
         </SectionTitle>
-        <p className="kf-body-text" style={{ marginBottom: 24 }}>
-          Your final rating depends on how many of your 5 kicks find the back of the net.
+        <p className="kf-body" style={{ marginBottom: 24 }}>
+          Don't lie to yourself. Five shots tells the truth.
         </p>
 
         <div className="kf-ratings">
           {[
-            { s: "5 / 5", l: "Outstanding!", c: "#ffd700", w: 100 },
-            { s: "4 / 5", l: "Great!",        c: "#4ade80", w: 80  },
-            { s: "3 / 5", l: "Not Bad",        c: "#fb923c", w: 60  },
-            { s: "0–2 / 5", l: "Need Practice", c: "#f87171", w: 38  },
+            { s: "5/5", l: "Outstanding", sub: "Flawless. Send this to your group chat.", c: "#ffd700", w: 100 },
+            { s: "4/5", l: "Clinical",    sub: "Pro-level finishing. One slip.",          c: "#4ade80", w: 80  },
+            { s: "3/5", l: "Decent",      sub: "Goalkeeper is still wary of you.",        c: "#fb923c", w: 60  },
+            { s: "0–2/5", l: "Needs Work", sub: "The keeper is starting to enjoy this.", c: "#f87171", w: 30  },
           ].map(r => (
-            <Card key={r.l}>
-              <div className="kf-rating-row">
-                <div className="kf-rating-score" style={{ color: r.c }}>{r.s}</div>
-                <div style={{ flex: 1 }}>
-                  <div className="kf-rating-label" style={{ color: r.c }}>{r.l}</div>
-                  <div className="kf-rating-bar">
-                    <div className="kf-rating-fill" style={{ width: `${r.w}%`, background: r.c }} />
-                  </div>
+            <div key={r.l} className="kf-rating-card">
+              <div className="kf-rating-score" style={{ color: r.c }}>{r.s}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="kf-rating-label" style={{ color: r.c }}>{r.l}</div>
+                <div className="kf-rating-sub">{r.sub}</div>
+                <div className="kf-rating-bar">
+                  <div className="kf-rating-fill" style={{ width: `${r.w}%`, background: r.c }} />
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          CTA BANNER
-      ══════════════════════════════════════ */}
-      <section className="kf-section" style={{ paddingTop: 10 }}>
-        <div className="kf-cta-banner">
-          <div className="kf-cta-glow" />
-          <div style={{ position: "relative" }}>
-            <div className="kf-cta-ball">⚽</div>
-            <h2 className="kf-cta-title">Ready to Score?</h2>
-            <p className="kf-cta-body">
-              The goalkeeper is waiting. The crowd is watching. Step up and take your shot.
-            </p>
-            <button className="kf-btn-play kf-btn-play--cta" onClick={onPlay}>
-              PLAY FREE NOW
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <Divider />
-
-      {/* ══════════════════════════════════════
-          LEGAL
-      ══════════════════════════════════════ */}
-      <section id="legal" className="kf-section">
-        <Tag>Legal</Tag>
-        <SectionTitle>Terms of Use</SectionTitle>
-        <p className="kf-body-text" style={{ marginBottom: 24 }}>
-          By using Kickoff 2026 you agree to these terms. We have kept them short and clear.
-        </p>
-        <div className="kf-stack">
-          {[
-            { t: "Free Entertainment Only",   b: "Kickoff 2026 is provided entirely free of charge as a browser-based entertainment product. No real money, gambling, or wagering is involved at any stage of gameplay." },
-            { t: "No Account Required",        b: "You do not need to create an account, provide any personal information, or agree to any subscription to play. The game runs entirely in your browser." },
-            { t: "Intellectual Property",      b: "All game artwork, code, and branding associated with Kickoff 2026 are the property of their respective creators. Unauthorized reproduction or redistribution is not permitted." },
-            { t: "Service Availability",       b: "We strive to keep the game available at all times but cannot guarantee uninterrupted access. The service may be updated, modified, or temporarily unavailable without prior notice." },
-            { t: "Limitation of Liability",    b: "Kickoff 2026 is provided as-is with no warranties of any kind, express or implied. Your use of the service is at your own risk." },
-          ].map(item => (
-            <Card key={item.t}>
-              <div className="kf-legal-title">{item.t}</div>
-              <div className="kf-legal-body">{item.b}</div>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <Divider />
-
-      {/* ══════════════════════════════════════
-          COOKIES
-      ══════════════════════════════════════ */}
-      <section id="cookies" className="kf-section">
-        <Tag>Privacy</Tag>
-        <SectionTitle>Cookie Policy</SectionTitle>
-        <p className="kf-body-text" style={{ marginBottom: 24 }}>
-          We believe your data belongs to you. Here is exactly how Kickoff 2026 handles information about your visit.
-        </p>
-        <div className="kf-stack">
-          {[
-            { icon: "✅", t: "No Tracking Cookies", b: "We do not set advertising cookies, cross-site tracking pixels, or any technology designed to follow you around the web. Your browsing is your own business.", hi: true },
-            { icon: "⚙️", t: "Functional Only",     b: "Your browser may store session data to keep the game running smoothly. This data never leaves your device and is not transmitted to any third-party server.", hi: false },
-            { icon: "📊", t: "Basic Analytics",     b: "We may collect anonymous, aggregated statistics such as page views to understand how many people are playing. This data contains no personally identifiable information.", hi: false },
-            { icon: "🔒", t: "Your Control",        b: "You can clear all locally stored data at any time through your browser settings. Doing so will not affect your ability to play the game.", hi: false },
-          ].map(item => (
-            <div key={item.t} className={`kf-cookie-row${item.hi ? " kf-cookie-row--hi" : ""}`}>
-              <span className="kf-cookie-icon">{item.icon}</span>
-              <div>
-                <div className="kf-legal-title">{item.t}</div>
-                <div className="kf-legal-body">{item.b}</div>
               </div>
             </div>
           ))}
         </div>
-        <p className="kf-fine-print">
-          Last updated: June 2026. If you have any questions about our privacy practices please review this page at any time.
-        </p>
+      </section>
+
+      {/* ══════════════════════════════════════
+          CTA — one final push
+      ══════════════════════════════════════ */}
+      <section className="kf-section" style={{ paddingTop: 0 }}>
+        <div className="kf-cta">
+          <div className="kf-cta-glow" />
+          <p className="kf-cta-eyebrow">The penalty spot is empty.</p>
+          <h2 className="kf-cta-h2">Step up.</h2>
+          <button className="kf-btn kf-btn--cta" onClick={onPlay}>
+            Take the penalty — free
+          </button>
+          <p className="kf-cta-note">kickoff2026.fun · World Cup 2026</p>
+        </div>
       </section>
 
       <Divider />
 
       {/* ══════════════════════════════════════
-          FOOTER
+          FOOTER — Legal + Cookie live here only
       ══════════════════════════════════════ */}
       <footer className="kf-footer">
         <div className="kf-footer-inner">
@@ -373,17 +341,15 @@ export default function Home({ onPlay }: HomeProps) {
           {/* Brand */}
           <div className="kf-footer-brand">
             <Logo size="md" />
-            <p className="kf-footer-tagline">
-              The free browser penalty kick game for football fans everywhere.
-              Step up to the spot, pick your corner, and beat the keeper.
+            <p className="kf-footer-tag">
+              Free browser penalty kicks for football fans everywhere.
+              No installs. No accounts. Just football.
             </p>
-            <div className="kf-live-badge">
+            <div className="kf-live-pill">
               <div className="kf-live-dot" />
-              <span>Live at kickoff2026.fun</span>
+              Live at kickoff2026.fun
             </div>
-
-            {/* Orynth badge */}
-            <div className="kf-orynth-badge">
+            <div style={{ marginTop: 20 }}>
               <a
                 href="https://orynth.dev/projects/kickoff-2026"
                 target="_blank"
@@ -392,97 +358,94 @@ export default function Home({ onPlay }: HomeProps) {
                 <img
                   src="https://orynth.dev/api/badge/kickoff-2026?theme=dark&style=default"
                   alt="Featured on Orynth"
-                  width="200"
-                  height="62"
-                  style={{ display: "block" }}
+                  width="180"
+                  height="56"
+                  style={{ display: "block", borderRadius: 10, opacity: 0.9 }}
                 />
               </a>
             </div>
           </div>
 
-          {/* Link columns */}
+          {/* Links */}
           <div className="kf-footer-cols">
-            {/* Play */}
             <div>
-              <div className="kf-footer-col-head kf-green">Play</div>
+              <div className="kf-col-head kf-green">Play</div>
               {[
-                { label: "Play Free Now",  fn: onPlay },
-                { label: "How It Works",   fn: () => go("how-it-works") },
-                { label: "Your Rating",    fn: () => go("ratings") },
-              ].map(l => (
-                <button key={l.label} className="kf-footer-link" onClick={l.fn}>
-                  {l.label}
-                </button>
+                { l: "Play Free Now",   fn: onPlay },
+                { l: "How to Play",     fn: () => go("how-to-play") },
+                { l: "Ratings Guide",   fn: () => go("ratings") },
+              ].map(x => (
+                <button key={x.l} className="kf-footer-link" onClick={x.fn}>{x.l}</button>
               ))}
             </div>
 
-            {/* About */}
             <div>
-              <div className="kf-footer-col-head kf-green">About</div>
+              <div className="kf-col-head kf-green">Game</div>
               {[
-                { label: "About the Game", fn: () => go("about") },
-                { label: "Game Features",  fn: () => go("about") },
-                { label: "Stadium Mode",   fn: () => go("about") },
-              ].map(l => (
-                <button key={l.label} className="kf-footer-link" onClick={l.fn}>
-                  {l.label}
-                </button>
+                { l: "Gameplay",    fn: () => go("gameplay") },
+                { l: "Features",    fn: () => go("gameplay") },
+                { l: "Stadium",     fn: () => go("gameplay") },
+              ].map(x => (
+                <button key={x.l} className="kf-footer-link" onClick={x.fn}>{x.l}</button>
               ))}
             </div>
 
-            {/* Legal */}
             <div>
-              <div className="kf-footer-col-head" style={{ color: "rgba(255,255,255,0.35)" }}>Legal</div>
+              <div className="kf-col-head" style={{ color: "rgba(255,255,255,0.3)" }}>Legal &amp; Privacy</div>
               {[
-                { label: "Terms of Use",          fn: () => go("legal") },
-                { label: "Limitation of Liability", fn: () => go("legal") },
-                { label: "Intellectual Property",  fn: () => go("legal") },
-              ].map(l => (
-                <button key={l.label} className="kf-footer-link" onClick={l.fn}>
-                  {l.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Privacy */}
-            <div>
-              <div className="kf-footer-col-head" style={{ color: "rgba(255,255,255,0.35)" }}>Privacy</div>
-              {[
-                { label: "Cookie Policy",    fn: () => go("cookies") },
-                { label: "No Tracking",      fn: () => go("cookies") },
-                { label: "Your Data Rights", fn: () => go("cookies") },
-              ].map(l => (
-                <button key={l.label} className="kf-footer-link" onClick={l.fn}>
-                  {l.label}
-                </button>
+                { l: "Terms of Use",   fn: () => go("footer-legal") },
+                { l: "Cookie Policy",  fn: () => go("footer-legal") },
+                { l: "No Tracking",    fn: () => go("footer-legal") },
+              ].map(x => (
+                <button key={x.l} className="kf-footer-link" onClick={x.fn}>{x.l}</button>
               ))}
             </div>
           </div>
 
-          {/* Play CTA in footer */}
-          <button className="kf-btn-play kf-btn-play--full" onClick={onPlay}>
+          {/* Play CTA */}
+          <button className="kf-btn kf-btn--full" style={{ marginTop: 8 }} onClick={onPlay}>
             PLAY FREE NOW
           </button>
+
+          {/* ── Legal & Privacy — compact, footer-only ── */}
+          <div id="footer-legal" className="kf-legal-block">
+            <div className="kf-legal-row">
+              <span className="kf-legal-head">Terms of Use</span>
+              <span className="kf-legal-text">
+                Kickoff 2026 is free entertainment. No gambling, no real money, no wagering.
+                All artwork and code are property of their creators — unauthorized redistribution
+                is not permitted. Service is provided as-is with no warranties.
+              </span>
+            </div>
+            <div className="kf-legal-row">
+              <span className="kf-legal-head">Privacy &amp; Cookies</span>
+              <span className="kf-legal-text">
+                We don't set tracking or advertising cookies. Your browser may store session data
+                locally — it never leaves your device. We may collect anonymous page-view counts.
+                Clear browser data any time with no effect on gameplay.
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom */}
         <div className="kf-footer-bottom">
           <span>© 2026 Kickoff2026.fun</span>
-          <span className="kf-footer-sep">|</span>
+          <span className="kf-sep">·</span>
           <span>All rights reserved</span>
-          <span className="kf-footer-sep">|</span>
+          <span className="kf-sep">·</span>
           <span>Celebrating FIFA World Cup 2026</span>
         </div>
       </footer>
 
       {/* ══════════════════════════════════════
-          GLOBAL STYLES
+          STYLES
       ══════════════════════════════════════ */}
       <style>{`
-        /* ── Reset ── */
+        /* reset */
         .kf-root * { box-sizing: border-box; }
 
-        /* ── Root ── */
+        /* root */
         .kf-root {
           background: #060c18;
           color: #fff;
@@ -491,383 +454,320 @@ export default function Home({ onPlay }: HomeProps) {
           overflow-x: hidden;
         }
 
-        /* ── Tag ── */
-        .kf-tag {
-          display: inline-block;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          padding: 5px 12px;
-          border-radius: 20px;
-          background: rgba(74,222,128,0.1);
-          color: #4ade80;
-          border: 1px solid rgba(74,222,128,0.22);
-          margin-bottom: 14px;
-        }
-
-        /* ── Section title ── */
-        .kf-section-title {
-          font-size: clamp(22px, 6vw, 28px);
-          font-weight: 900;
-          letter-spacing: -0.02em;
-          line-height: 1.2;
-          margin-bottom: 14px;
-          color: #fff;
-        }
-
-        /* ── Color helpers ── */
+        /* colours */
         .kf-green { color: #4ade80; }
         .kf-gold  { color: #ffd700; }
 
-        /* ── Divider ── */
+        /* divider */
         .kf-divider {
           height: 1px;
-          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
-          margin: 0 20px;
+          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+          margin: 0 24px;
         }
 
-        /* ── Card ── */
+        /* tag */
+        .kf-tag {
+          display: inline-block; font-size: 10px; font-weight: 800;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          padding: 4px 12px; border-radius: 20px;
+          background: rgba(74,222,128,0.1); color: #4ade80;
+          border: 1px solid rgba(74,222,128,0.2); margin-bottom: 14px;
+        }
+
+        /* section title */
+        .kf-section-title {
+          font-size: clamp(24px, 7vw, 32px); font-weight: 900;
+          letter-spacing: -0.025em; line-height: 1.15;
+          margin-bottom: 14px; color: #fff;
+        }
+
+        /* section */
+        .kf-section {
+          padding: 52px 20px;
+          max-width: 560px; margin: 0 auto; width: 100%;
+        }
+
+        /* body text */
+        .kf-body {
+          font-size: 14px; line-height: 1.75; color: rgba(255,255,255,0.55);
+        }
+
+        /* card */
         .kf-card {
-          background: rgba(255,255,255,0.035);
+          background: rgba(255,255,255,0.03);
           border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 16px;
-          padding: 16px 18px;
+          border-radius: 16px; padding: 18px;
         }
         .kf-card--glow {
-          background: linear-gradient(135deg,rgba(74,222,128,0.07),rgba(74,222,128,0.02));
-          border-color: rgba(74,222,128,0.18);
+          background: linear-gradient(135deg,rgba(74,222,128,0.06),rgba(74,222,128,0.01));
+          border-color: rgba(74,222,128,0.15);
         }
 
-        /* ── Section ── */
-        .kf-section {
-          padding: 48px 20px;
-          max-width: 600px;
-          margin: 0 auto;
-          width: 100%;
+        /* feature cards */
+        .kf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .kf-feat-icon  { font-size: 28px; margin-bottom: 10px; }
+        .kf-feat-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .kf-feat-body  { font-size: 12px; line-height: 1.65; color: rgba(255,255,255,0.45); }
+
+        /* steps */
+        .kf-steps { display: flex; flex-direction: column; gap: 0; }
+        .kf-step {
+          display: flex; gap: 18px; align-items: flex-start;
+          padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-
-        /* ── Body text ── */
-        .kf-body-text {
-          font-size: 14px;
-          line-height: 1.75;
-          color: rgba(255,255,255,0.58);
+        .kf-step:last-child { border-bottom: none; }
+        .kf-step-n {
+          font-size: 13px; font-weight: 900; color: #4ade80;
+          letter-spacing: 0.05em; flex-shrink: 0; width: 28px; padding-top: 2px;
         }
+        .kf-step-t { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 5px; }
+        .kf-step-d { font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.5); }
 
-        /* ── Stack (vertical gap) ── */
-        .kf-stack { display: flex; flex-direction: column; gap: 10px; }
-
-        /* ── 2-col grid ── */
-        .kf-grid-2 {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
+        /* ratings */
+        .kf-ratings { display: flex; flex-direction: column; gap: 10px; }
+        .kf-rating-card {
+          display: flex; gap: 16px; align-items: center;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px; padding: 14px 16px;
         }
-
-        /* ── Feature card internals ── */
-        .kf-feature-icon  { font-size: 26px; margin-bottom: 8px; }
-        .kf-feature-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-        .kf-feature-body  { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.48); }
-
-        /* ── Steps ── */
-        .kf-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .kf-step-row   { display: flex; gap: 14px; align-items: flex-start; }
-        .kf-step-num   {
-          flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          font-weight: 900; font-size: 16px;
-          background: linear-gradient(135deg,#16a34a,#4ade80); color: #fff;
+        .kf-rating-score {
+          font-size: 20px; font-weight: 900; min-width: 52px;
+          flex-shrink: 0; letter-spacing: -0.02em;
         }
-        .kf-step-head  { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
-        .kf-step-icon  { font-size: 16px; }
-        .kf-step-title { font-size: 14px; font-weight: 700; color: #fff; }
-        .kf-step-body  { font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.52); }
+        .kf-rating-label { font-size: 14px; font-weight: 800; margin-bottom: 3px; }
+        .kf-rating-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+        .kf-rating-bar { height: 4px; border-radius: 4px; background: rgba(255,255,255,0.07); overflow: hidden; }
+        .kf-rating-fill { height: 100%; border-radius: 4px; }
 
-        /* ── Ratings ── */
-        .kf-ratings      { display: flex; flex-direction: column; gap: 10px; }
-        .kf-rating-row   { display: flex; align-items: center; gap: 14px; }
-        .kf-rating-score { font-size: 18px; font-weight: 900; min-width: 52px; flex-shrink: 0; }
-        .kf-rating-label { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-        .kf-rating-bar   { height: 5px; border-radius: 4px; background: rgba(255,255,255,0.07); overflow: hidden; }
-        .kf-rating-fill  { height: 100%; border-radius: 4px; }
-
-        /* ── CTA banner ── */
-        .kf-cta-banner {
-          border-radius: 24px; padding: 36px 24px; text-align: center;
-          background: linear-gradient(135deg,rgba(13,51,32,0.95),rgba(15,61,38,0.95));
-          border: 1px solid rgba(74,222,128,0.2);
-          box-shadow: 0 0 50px rgba(74,222,128,0.08) inset;
+        /* CTA */
+        .kf-cta {
+          border-radius: 24px; padding: 40px 24px; text-align: center;
+          background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(22,163,74,0.12) 0%, transparent 70%),
+                      linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+          border: 1px solid rgba(74,222,128,0.15);
           position: relative; overflow: hidden;
         }
         .kf-cta-glow {
-          position: absolute; top: 0; left: 0; right: 0; height: 50%; pointer-events: none;
-          background: radial-gradient(ellipse at 50% 0%,rgba(74,222,128,0.1),transparent 70%);
+          position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
+          background: linear-gradient(90deg,transparent,rgba(74,222,128,0.5),transparent);
         }
-        .kf-cta-ball  { font-size: 40px; margin-bottom: 10px; }
-        .kf-cta-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
-        .kf-cta-body  { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 22px; line-height: 1.65; }
+        .kf-cta-eyebrow {
+          font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+          color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 10px;
+        }
+        .kf-cta-h2 {
+          font-size: clamp(36px,12vw,64px); font-weight: 900;
+          letter-spacing: -0.04em; color: #fff; margin-bottom: 24px;
+          line-height: 1;
+        }
+        .kf-cta-note {
+          margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.25);
+          letter-spacing: 0.05em;
+        }
 
-        /* ── Legal / cookie ── */
-        .kf-legal-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 7px; }
-        .kf-legal-body  { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.48); }
-        .kf-cookie-row  {
-          display: flex; gap: 14px; padding: 16px 18px; border-radius: 16px;
-          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-        }
-        .kf-cookie-row--hi {
-          background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.18);
-        }
-        .kf-cookie-icon { font-size: 22px; flex-shrink: 0; }
-        .kf-fine-print  { font-size: 12px; color: rgba(255,255,255,0.28); line-height: 1.7; margin-top: 20px; }
-
-        /* ── Buttons ── */
-        .kf-btn-play {
+        /* buttons */
+        .kf-btn {
           background: linear-gradient(135deg,#16a34a,#22c55e,#4ade80);
           color: #fff; border: none; cursor: pointer;
-          font-weight: 900; letter-spacing: 0.04em;
-          transition: box-shadow 0.2s, transform 0.15s;
+          font-family: inherit; font-weight: 800; letter-spacing: 0.03em;
+          transition: filter 0.2s, transform 0.15s;
         }
-        .kf-btn-play:hover {
-          box-shadow: 0 0 28px rgba(74,222,128,0.5);
-          transform: scale(1.03);
-        }
-        .kf-btn-play--sm {
-          border-radius: 50px; padding: 8px 18px;
-          font-size: 13px;
-          box-shadow: 0 0 16px rgba(74,222,128,0.3);
-        }
-        .kf-btn-play--hero {
+        .kf-btn:hover  { filter: brightness(1.12); transform: scale(1.03); }
+        .kf-btn:active { transform: scale(0.98); }
+        .kf-btn--sm    { border-radius: 50px; padding: 8px 18px; font-size: 13px; box-shadow: 0 0 16px rgba(74,222,128,0.25); }
+        .kf-btn--hero  {
           display: block; width: 100%; border-radius: 16px;
-          padding: 18px 0; font-size: 17px;
-          box-shadow: 0 8px 40px rgba(74,222,128,0.4), 0 0 0 1px rgba(74,222,128,0.18);
+          padding: 18px; font-size: 18px; letter-spacing: 0.05em;
+          box-shadow: 0 8px 36px rgba(74,222,128,0.4);
           margin-bottom: 10px;
         }
-        .kf-btn-play--full {
-          display: block; width: 100%; border-radius: 14px;
-          padding: 16px 0; font-size: 15px;
-          box-shadow: 0 4px 24px rgba(74,222,128,0.32);
-        }
-        .kf-btn-play--cta {
-          border-radius: 14px; padding: 15px 40px;
-          font-size: 16px;
-          box-shadow: 0 4px 28px rgba(74,222,128,0.45);
-        }
+        .kf-btn--full  { display: block; width: 100%; border-radius: 14px; padding: 15px; font-size: 15px; }
+        .kf-btn--cta   { border-radius: 14px; padding: 16px 40px; font-size: 17px; box-shadow: 0 4px 32px rgba(74,222,128,0.35); }
 
-        /* ════════════════════════════════════
-           NAV
-        ════════════════════════════════════ */
+        /* ────────────── NAV ────────────── */
         .kf-nav {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-          transition: all 0.3s ease;
+          position: fixed; top: 3px; left: 0; right: 0; z-index: 100;
+          transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
         }
         .kf-nav--scrolled {
-          background: rgba(6,12,24,0.92);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
+          background: rgba(6,12,24,0.9);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .kf-nav-inner {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 10px 20px; max-width: 1200px; margin: 0 auto;
-          gap: 12px;
+          padding: 10px 20px; gap: 10px;
         }
-        /* Desktop nav links — hidden on mobile */
-        .kf-nav-links {
-          display: none;
-          align-items: center; gap: 4px; flex: 1; justify-content: center;
-        }
+        .kf-nav-links { display: none; align-items: center; gap: 4px; }
         .kf-nav-link {
           background: none; border: none; cursor: pointer;
-          font-size: 13px; font-weight: 600;
-          color: rgba(255,255,255,0.6); padding: 6px 10px; border-radius: 8px;
-          transition: color 0.2s;
+          font-size: 13px; font-weight: 600; font-family: inherit;
+          color: rgba(255,255,255,0.55); padding: 7px 11px; border-radius: 8px;
+          transition: color 0.2s, background 0.2s;
         }
-        .kf-nav-link:hover { color: #fff; }
-
-        /* Right side: play btn + hamburger */
-        .kf-nav-right {
-          display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-        }
-
-        /* Hamburger — shown on mobile */
+        .kf-nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .kf-nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .kf-hamburger {
-          display: flex; flex-direction: column; justify-content: center;
-          gap: 5px; background: none; border: none; cursor: pointer;
-          padding: 6px; border-radius: 8px; width: 38px; height: 38px;
+          display: flex; flex-direction: column; justify-content: center; gap: 5px;
+          background: none; border: none; cursor: pointer;
+          padding: 6px; width: 38px; height: 38px; border-radius: 8px;
         }
         .kf-hamburger span {
-          display: block; height: 2px; border-radius: 2px;
-          background: rgba(255,255,255,0.75);
-          transition: transform 0.25s, opacity 0.25s;
-          transform-origin: center;
+          display: block; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.7);
+          transition: transform 0.25s, opacity 0.2s;
         }
         .kf-hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .kf-hamburger--open span:nth-child(2) { opacity: 0; }
         .kf-hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* Mobile drawer */
-        .kf-mobile-menu {
-          display: flex; flex-direction: column; gap: 4px;
-          padding: 0 16px;
+        /* mobile drawer */
+        .kf-drawer {
+          background: rgba(4,10,20,0.98);
+          border-top: 1px solid rgba(255,255,255,0.06);
           max-height: 0; overflow: hidden;
           transition: max-height 0.3s ease, padding 0.3s ease;
-          background: rgba(6,12,24,0.97);
-          border-top: 1px solid rgba(255,255,255,0.06);
+          display: flex; flex-direction: column; gap: 2px;
+          padding: 0 16px;
         }
-        .kf-mobile-menu--open {
-          max-height: 400px;
-          padding: 12px 16px 20px;
-        }
-        .kf-mobile-link {
-          background: none; border: none; cursor: pointer;
-          font-size: 16px; font-weight: 600;
-          color: rgba(255,255,255,0.75); padding: 12px 8px;
-          text-align: left; border-radius: 10px;
-          transition: background 0.15s, color 0.15s;
+        .kf-drawer--open { max-height: 400px; padding: 14px 16px 22px; }
+        .kf-drawer-link {
+          background: none; border: none; cursor: pointer; font-family: inherit;
+          font-size: 17px; font-weight: 600; color: rgba(255,255,255,0.7);
+          padding: 13px 8px; text-align: left; border-radius: 10px;
           border-bottom: 1px solid rgba(255,255,255,0.05);
+          transition: color 0.15s, background 0.15s;
         }
-        .kf-mobile-link:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .kf-drawer-link:hover { color: #fff; background: rgba(255,255,255,0.04); }
 
-        /* ════════════════════════════════════
-           HERO
-        ════════════════════════════════════ */
+        /* ────────────── HERO ────────────── */
         .kf-hero {
           position: relative; min-height: 100svh;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
-          padding: 90px 20px 60px; text-align: center; overflow: hidden;
+          padding: 100px 20px 70px; text-align: center; overflow: hidden;
         }
-        .kf-hero-glow {
+        .kf-hero-bg {
           position: absolute; inset: 0; pointer-events: none;
-          background: radial-gradient(ellipse 80% 50% at 50% 20%,rgba(74,222,128,0.07) 0%,transparent 70%);
+          background:
+            radial-gradient(ellipse 120% 60% at 50% 0%, rgba(22,163,74,0.09) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 40% at 20% 80%, rgba(74,222,128,0.04) 0%, transparent 60%);
         }
         .kf-hero-fade {
-          position: absolute; bottom: 0; left: 0; right: 0; height: 38%; pointer-events: none;
-          background: linear-gradient(180deg,transparent,rgba(10,50,26,0.55));
+          position: absolute; bottom: 0; left: 0; right: 0; height: 35%; pointer-events: none;
+          background: linear-gradient(transparent, rgba(6,12,24,0.8));
         }
         .kf-floodlight {
-          position: absolute; top: 80px; width: 8px; height: 8px; border-radius: 50%;
-          background: #fffde7; box-shadow: 0 0 20px 8px rgba(255,253,200,0.3);
+          position: absolute; top: 90px; width: 6px; height: 6px; border-radius: 50%;
+          background: #fefce8; box-shadow: 0 0 18px 10px rgba(254,252,200,0.25);
         }
-        .kf-floodlight--left  { left: 18px; }
-        .kf-floodlight--right { right: 18px; }
-        .kf-hero-content {
-          position: relative; z-index: 2; max-width: 400px; width: 100%;
-        }
-        .kf-hero-logo   { margin-bottom: 20px; display: flex; justify-content: center; }
-        .kf-badge {
+        .kf-floodlight--l { left: 14px; }
+        .kf-floodlight--r { right: 14px; }
+
+        .kf-hero-inner { position: relative; z-index: 2; max-width: 440px; width: 100%; }
+
+        .kf-pill {
           display: inline-block; font-size: 11px; font-weight: 700;
-          letter-spacing: 0.16em; text-transform: uppercase;
+          letter-spacing: 0.12em; text-transform: uppercase;
           padding: 5px 14px; border-radius: 20px;
-          background: rgba(74,222,128,0.1); color: #4ade80;
-          border: 1px solid rgba(74,222,128,0.22); margin-bottom: 20px;
+          background: rgba(74,222,128,0.08); color: rgba(74,222,128,0.9);
+          border: 1px solid rgba(74,222,128,0.18); margin-bottom: 24px;
         }
-        .kf-hero-title {
-          font-size: clamp(30px, 9vw, 42px); font-weight: 900;
-          line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 16px;
+
+        .kf-hero-h1 {
+          font-size: clamp(40px, 13vw, 68px); font-weight: 900;
+          line-height: 1.05; letter-spacing: -0.035em;
+          margin-bottom: 20px;
         }
+
         .kf-hero-sub {
-          font-size: 15px; line-height: 1.65; color: rgba(255,255,255,0.58); margin-bottom: 28px;
+          font-size: 15px; line-height: 1.7;
+          color: rgba(255,255,255,0.5); margin-bottom: 32px;
         }
-        .kf-hero-note { font-size: 12px; color: rgba(255,255,255,0.28); }
+        .kf-br-hide { display: none; }
 
-        .kf-stats {
-          position: relative; z-index: 2;
-          display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
-          width: 100%; max-width: 400px; margin-top: 32px;
+        /* quick truths row */
+        .kf-truths {
+          display: flex; align-items: center; justify-content: center;
+          gap: 0; margin-top: 20px; font-size: 12px;
         }
-        .kf-stat {
-          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 14px; padding: 14px 8px; text-align: center;
+        .kf-truth { display: flex; flex-direction: column; align-items: center; padding: 0 16px; }
+        .kf-truth-n {
+          font-size: 22px; font-weight: 900; color: #4ade80;
+          line-height: 1; letter-spacing: -0.02em;
         }
-        .kf-stat-val { font-size: 26px; font-weight: 900; color: #4ade80; line-height: 1; }
-        .kf-stat-lbl {
-          font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
-          text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 5px;
-        }
+        .kf-truth-unit { font-size: 12px; font-weight: 700; opacity: 0.7; }
+        .kf-truth-l { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 4px; }
+        .kf-truth-sep { width: 1px; height: 32px; background: rgba(255,255,255,0.08); }
+
+        /* scroll hint */
         .kf-scroll-hint {
-          position: relative; z-index: 2; margin-top: 36px;
-          display: flex; flex-direction: column; align-items: center; gap: 6px;
-          font-size: 11px; color: rgba(255,255,255,0.28);
+          position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+          z-index: 2;
         }
-        .kf-bounce { animation: kfBounce 2s infinite; }
+        .kf-bounce-icon { animation: kfBounce 2.2s ease-in-out infinite; }
 
-        /* ════════════════════════════════════
-           FOOTER
-        ════════════════════════════════════ */
+        /* ────────────── FOOTER ────────────── */
         .kf-footer {
-          background: linear-gradient(180deg,rgba(0,0,0,0.3),rgba(3,7,15,0.95));
-          border-top: 1px solid rgba(255,255,255,0.07);
-          margin-top: 8px;
+          background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(3,7,15,0.98));
+          border-top: 1px solid rgba(255,255,255,0.06);
         }
-        .kf-footer-inner {
-          max-width: 600px; margin: 0 auto; padding: 48px 24px 36px;
+        .kf-footer-inner { max-width: 560px; margin: 0 auto; padding: 48px 20px 36px; }
+        .kf-footer-brand { margin-bottom: 40px; }
+        .kf-footer-tag { font-size: 13px; color: rgba(255,255,255,0.38); line-height: 1.7; margin-top: 14px; max-width: 260px; }
+        .kf-live-pill {
+          display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+          padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+          color: #4ade80; background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.16);
         }
-        .kf-footer-brand  { margin-bottom: 36px; }
-        .kf-footer-tagline {
-          font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.7;
-          margin-top: 14px; max-width: 280px;
-        }
-        .kf-live-badge {
-          display: inline-flex; align-items: center; gap: 7px; margin-top: 14px;
-          padding: 6px 12px; border-radius: 20px;
-          background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.18);
-          font-size: 11px; font-weight: 600; color: #4ade80;
-        }
-        .kf-live-dot {
-          width: 7px; height: 7px; border-radius: 50%;
-          background: #4ade80; box-shadow: 0 0 6px #4ade80;
-        }
-        .kf-orynth-badge { margin-top: 20px; }
-        .kf-orynth-badge img { border-radius: 10px; opacity: 0.9; transition: opacity 0.2s; }
-        .kf-orynth-badge img:hover { opacity: 1; }
+        .kf-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; flex-shrink: 0; }
 
-        .kf-footer-cols {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 28px 16px; margin-bottom: 36px;
-        }
-        .kf-footer-col-head {
-          font-size: 10px; font-weight: 800; letter-spacing: 0.18em;
-          text-transform: uppercase; margin-bottom: 14px;
-        }
+        .kf-footer-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 12px; margin-bottom: 32px; }
+        .kf-col-head { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 12px; }
         .kf-footer-link {
-          display: block; background: none; border: none; cursor: pointer;
-          font-size: 14px; color: rgba(255,255,255,0.55); padding: 6px 0;
-          text-align: left; width: 100%; transition: color 0.2s;
+          display: block; background: none; border: none; cursor: pointer; font-family: inherit;
+          font-size: 14px; color: rgba(255,255,255,0.48); padding: 5px 0; text-align: left;
+          transition: color 0.2s;
         }
         .kf-footer-link:hover { color: #fff; }
-        .kf-footer-sep { color: rgba(255,255,255,0.12); }
+
+        /* Legal/Privacy compact block */
+        .kf-legal-block {
+          margin-top: 40px; padding-top: 32px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          display: flex; flex-direction: column; gap: 24px;
+        }
+        .kf-legal-row { display: flex; flex-direction: column; gap: 6px; }
+        .kf-legal-head { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+        .kf-legal-text { font-size: 12px; line-height: 1.75; color: rgba(255,255,255,0.3); }
 
         .kf-footer-bottom {
-          border-top: 1px solid rgba(255,255,255,0.06);
-          padding: 18px 24px; max-width: 600px; margin: 0 auto;
-          display: flex; align-items: center; flex-wrap: wrap;
-          justify-content: center; gap: 8px;
-          font-size: 11px; color: rgba(255,255,255,0.22);
+          border-top: 1px solid rgba(255,255,255,0.05);
+          padding: 16px 20px; max-width: 560px; margin: 0 auto;
+          display: flex; flex-wrap: wrap; justify-content: center;
+          gap: 8px; font-size: 11px; color: rgba(255,255,255,0.2);
         }
+        .kf-sep { color: rgba(255,255,255,0.1); }
 
-        /* ════════════════════════════════════
-           KEYFRAMES
-        ════════════════════════════════════ */
+        /* ────────────── KEYFRAMES ────────────── */
         @keyframes kfBounce {
           0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(6px); }
+          50%       { transform: translateY(7px); }
         }
 
-        /* ════════════════════════════════════
-           RESPONSIVE — tablet & up (≥640px)
-        ════════════════════════════════════ */
+        /* ────────────── ≥640px ────────────── */
         @media (min-width: 640px) {
-          /* Show desktop nav links, hide hamburger */
-          .kf-nav-links    { display: flex; }
-          .kf-hamburger    { display: none; }
-          .kf-mobile-menu  { display: none !important; }
-
-          .kf-section      { padding: 64px 32px; }
-          .kf-footer-cols  { grid-template-columns: repeat(4, 1fr); }
+          .kf-nav-links   { display: flex; }
+          .kf-hamburger   { display: none; }
+          .kf-drawer      { display: none !important; }
+          .kf-section     { padding: 64px 32px; }
           .kf-footer-inner { padding: 56px 32px 40px; }
-          .kf-hero         { padding: 100px 32px 80px; }
-          .kf-hero-content { max-width: 480px; }
-          .kf-stats        { max-width: 480px; }
+          .kf-footer-cols { grid-template-columns: repeat(3, 1fr); }
+          .kf-hero        { padding: 120px 32px 80px; }
+          .kf-hero-inner  { max-width: 520px; }
+          .kf-hero-h1     { font-size: clamp(48px, 9vw, 72px); }
+          .kf-br-hide     { display: block; }
+          .kf-cta         { padding: 56px 40px; }
         }
       `}</style>
     </div>
