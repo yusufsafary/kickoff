@@ -700,7 +700,7 @@ export default function PenaltyGame() {
       ctx.font = "bold 32px Arial";
       ctx.fillStyle = "#fff";
       ctx.shadowBlur = 0;
-      ctx.fillText("Tendangan sempurna!", W / 2, H / 2 + 25);
+      ctx.fillText("Perfect shot!", W / 2, H / 2 + 25);
     } else if (res === "save") {
       ctx.textAlign = "center";
       ctx.font = `bold 70px Impact, Arial Black`;
@@ -711,18 +711,18 @@ export default function PenaltyGame() {
       ctx.font = "bold 28px Arial";
       ctx.fillStyle = "#fff";
       ctx.shadowBlur = 0;
-      ctx.fillText("Kiper menyelamatkan!", W / 2, H / 2 + 25);
+      ctx.fillText("Goalkeeper saved it!", W / 2, H / 2 + 25);
     } else if (res === "miss") {
       ctx.textAlign = "center";
       ctx.font = `bold 70px Impact, Arial Black`;
       ctx.fillStyle = "#ff8800";
       ctx.shadowColor = "#cc5500";
       ctx.shadowBlur = 20;
-      ctx.fillText("MELESET!", W / 2, H / 2 - 20);
+      ctx.fillText("MISSED!", W / 2, H / 2 - 20);
       ctx.font = "bold 28px Arial";
       ctx.fillStyle = "#fff";
       ctx.shadowBlur = 0;
-      ctx.fillText("Bola keluar!", W / 2, H / 2 + 25);
+      ctx.fillText("Ball went wide!", W / 2, H / 2 + 25);
     }
 
     ctx.restore();
@@ -744,7 +744,7 @@ export default function PenaltyGame() {
 
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.font = "13px Arial";
-    ctx.fillText(`Tendangan ${sc.attempts} / ${sc.total}`, W / 2, 50);
+    ctx.fillText(`Kick ${sc.attempts} / ${sc.total}`, W / 2, 50);
 
     // Attempt dots
     const dotSpacing = 24;
@@ -770,7 +770,7 @@ export default function PenaltyGame() {
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.font = "bold 15px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("Klik di area gawang untuk menendang!", W / 2, H - 15);
+      ctx.fillText("Click inside the goal area to shoot!", W / 2, H - 15);
     }
   };
 
@@ -921,7 +921,7 @@ export default function PenaltyGame() {
     ctx.shadowBlur = 0;
     ctx.fillStyle = "rgba(255,255,255,0.9)";
     ctx.font = "bold 26px Arial";
-    ctx.fillText("Game Tendangan Pinalti Realistis", W / 2, H / 2 - 20);
+    ctx.fillText("Realistic Penalty Kick Game", W / 2, H / 2 - 20);
 
     // Animated start button
     const btnPulse = 0.95 + 0.05 * Math.sin(frame * 0.08);
@@ -941,14 +941,14 @@ export default function PenaltyGame() {
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("MULAI MAIN", 0, 10);
+    ctx.fillText("PLAY NOW", 0, 10);
     ctx.restore();
 
     // Instructions
     ctx.fillStyle = "rgba(255,255,255,0.5)";
     ctx.font = "15px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("Klik gawang untuk menendang bola • 5 tendangan", W / 2, H / 2 + 120);
+    ctx.fillText("Click on the goal to shoot • 5 kicks", W / 2, H / 2 + 120);
 
     ctx.restore();
   };
@@ -959,14 +959,14 @@ export default function PenaltyGame() {
 
     const sc = scoreRef.current;
     const pct = (sc.goals / sc.total) * 100;
-    const rating = pct >= 80 ? "Luar Biasa!" : pct >= 60 ? "Bagus!" : pct >= 40 ? "Lumayan" : "Perlu Latihan";
+    const rating = pct >= 80 ? "Outstanding!" : pct >= 60 ? "Great!" : pct >= 40 ? "Not Bad" : "Need Practice";
     const ratingColor = pct >= 80 ? "#ffd700" : pct >= 60 ? "#4ade80" : pct >= 40 ? "#fb923c" : "#f87171";
 
     ctx.textAlign = "center";
 
     ctx.fillStyle = "#fff";
     ctx.font = "bold 38px Impact, Arial Black";
-    ctx.fillText("HASIL AKHIR", W / 2, H / 2 - 100);
+    ctx.fillText("FINAL SCORE", W / 2, H / 2 - 100);
 
     // Score display
     ctx.fillStyle = "#4ade80";
@@ -979,7 +979,7 @@ export default function PenaltyGame() {
 
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.font = "18px Arial";
-    ctx.fillText(`${sc.goals} gol dari ${sc.total} tendangan`, W / 2, H / 2 + 65);
+    ctx.fillText(`${sc.goals} goals from ${sc.total} kicks`, W / 2, H / 2 + 65);
 
     // Restart button
     ctx.fillStyle = "#1d4ed8";
@@ -991,7 +991,7 @@ export default function PenaltyGame() {
     ctx.stroke();
     ctx.fillStyle = "#fff";
     ctx.font = "bold 22px Arial";
-    ctx.fillText("MAIN LAGI", W / 2, H / 2 + 133);
+    ctx.fillText("PLAY AGAIN", W / 2, H / 2 + 133);
   };
 
   useEffect(() => {
