@@ -6,17 +6,8 @@ interface HomeProps {
   onPlay: () => void;
 }
 
-function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
-  return (
-    <div
-      style={{
-        animation: `fadeUp 0.55s ease both`,
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
+function Reveal({ children }: { children: ReactNode; delay?: number }) {
+  return <div>{children}</div>;
 }
 
 function Tag({ children }: { children: ReactNode }) {
