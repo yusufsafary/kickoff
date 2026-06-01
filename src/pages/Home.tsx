@@ -107,17 +107,47 @@ export default function Home({ onPlay }: HomeProps) {
           left: 0,
           right: 0,
           zIndex: 50,
-          padding: "10px 18px",
+          padding: "10px 20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: scrolled ? "rgba(6,12,24,0.9)" : "transparent",
-          backdropFilter: scrolled ? "blur(14px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+          background: scrolled ? "rgba(6,12,24,0.92)" : "transparent",
+          backdropFilter: scrolled ? "blur(18px)" : "none",
+          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.07)" : "none",
           transition: "all 0.3s ease",
         }}
       >
         <Logo size="sm" />
+
+        {/* Nav links */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {[
+            { label: "About", id: "about" },
+            { label: "How It Works", id: "how-it-works" },
+            { label: "Ratings", id: "ratings" },
+          ].map((link) => (
+            <button
+              key={link.id}
+              onClick={() => go(link.id)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.6)",
+                padding: "6px 10px",
+                borderRadius: 8,
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={onPlay}
           style={{
@@ -130,6 +160,15 @@ export default function Home({ onPlay }: HomeProps) {
             fontSize: 13,
             cursor: "pointer",
             boxShadow: "0 0 18px rgba(74,222,128,0.3)",
+            transition: "box-shadow 0.2s, transform 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = "0 0 28px rgba(74,222,128,0.5)";
+            e.currentTarget.style.transform = "scale(1.04)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = "0 0 18px rgba(74,222,128,0.3)";
+            e.currentTarget.style.transform = "scale(1)";
           }}
         >
           Play Free

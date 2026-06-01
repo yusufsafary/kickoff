@@ -44,8 +44,6 @@
   --muted-foreground: 220 10% 55%;
   --accent: 45 95% 55%;
   --accent-foreground: 0 0% 5%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 98%;
   --app-font-sans: 'Inter', sans-serif;
   --radius: 0.5rem;
 }
@@ -56,7 +54,7 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 }
 
@@ -77,6 +75,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 @keyframes pulse-glow {
