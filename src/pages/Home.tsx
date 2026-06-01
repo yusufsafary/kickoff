@@ -586,40 +586,270 @@ export default function Home({ onPlay }: HomeProps) {
       <Divider />
 
       {/* ===== FOOTER ===== */}
-      <footer style={{ padding: "44px 20px", background: "rgba(0,0,0,0.25)" }}>
-        <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, textAlign: "center" }}>
-          <Logo size="md" />
+      <footer
+        style={{
+          background: "linear-gradient(180deg,rgba(0,0,0,0.3),rgba(3,7,15,0.95))",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          marginTop: 8,
+        }}
+      >
+        {/* Top footer — columns */}
+        <div
+          style={{
+            maxWidth: 480,
+            margin: "0 auto",
+            padding: "48px 24px 36px",
+          }}
+        >
+          {/* Brand column */}
+          <div style={{ marginBottom: 36 }}>
+            <Logo size="md" />
+            <p
+              style={{
+                fontSize: 13,
+                color: "rgba(255,255,255,0.4)",
+                lineHeight: 1.7,
+                marginTop: 14,
+                maxWidth: 280,
+              }}
+            >
+              The free browser penalty kick game for football fans everywhere.
+              Step up to the spot, pick your corner, and beat the keeper.
+            </p>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                marginTop: 14,
+                padding: "6px 12px",
+                borderRadius: 20,
+                background: "rgba(74,222,128,0.08)",
+                border: "1px solid rgba(74,222,128,0.18)",
+              }}
+            >
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 6px #4ade80" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#4ade80" }}>
+                Live at kickoff2026.fun
+              </span>
+            </div>
+          </div>
 
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", maxWidth: 260, lineHeight: 1.65 }}>
-            The browser penalty kick game for football fans everywhere. Pick your corner. Beat the keeper.
-          </p>
-
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 20px" }}>
-            {[
-              { label: "Play Now", fn: onPlay },
-              { label: "About", fn: () => go("about") },
-              { label: "How It Works", fn: () => go("how-it-works") },
-              { label: "Legal", fn: () => go("legal") },
-              { label: "Cookies", fn: () => go("cookies") },
-            ].map((l) => (
-              <button
-                key={l.label}
-                onClick={l.fn}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "rgba(255,255,255,0.42)", padding: 0 }}
+          {/* Link columns — side by side on mobile */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "28px 16px",
+              marginBottom: 36,
+            }}
+          >
+            {/* Play */}
+            <div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#4ade80",
+                  marginBottom: 14,
+                }}
               >
-                {l.label}
-              </button>
-            ))}
+                Play
+              </div>
+              {[
+                { label: "Play Free Now", fn: onPlay },
+                { label: "How It Works", fn: () => go("how-it-works") },
+                { label: "Your Rating", fn: () => go("ratings") },
+              ].map((l) => (
+                <button
+                  key={l.label}
+                  onClick={l.fn}
+                  style={{
+                    display: "block",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.55)",
+                    padding: "6px 0",
+                    textAlign: "left",
+                    width: "100%",
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+
+            {/* About */}
+            <div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#4ade80",
+                  marginBottom: 14,
+                }}
+              >
+                About
+              </div>
+              {[
+                { label: "About the Game", fn: () => go("about") },
+                { label: "Game Features", fn: () => go("about") },
+                { label: "Stadium Mode", fn: () => go("about") },
+              ].map((l) => (
+                <button
+                  key={l.label}
+                  onClick={l.fn}
+                  style={{
+                    display: "block",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.55)",
+                    padding: "6px 0",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Legal */}
+            <div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.35)",
+                  marginBottom: 14,
+                }}
+              >
+                Legal
+              </div>
+              {[
+                { label: "Terms of Use", fn: () => go("legal") },
+                { label: "Limitation of Liability", fn: () => go("legal") },
+                { label: "Intellectual Property", fn: () => go("legal") },
+              ].map((l) => (
+                <button
+                  key={l.label}
+                  onClick={l.fn}
+                  style={{
+                    display: "block",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.55)",
+                    padding: "6px 0",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Privacy */}
+            <div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.35)",
+                  marginBottom: 14,
+                }}
+              >
+                Privacy
+              </div>
+              {[
+                { label: "Cookie Policy", fn: () => go("cookies") },
+                { label: "No Tracking", fn: () => go("cookies") },
+                { label: "Your Data Rights", fn: () => go("cookies") },
+              ].map((l) => (
+                <button
+                  key={l.label}
+                  onClick={l.fn}
+                  style={{
+                    display: "block",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.55)",
+                    padding: "6px 0",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80" }} />
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)" }}>Celebrating FIFA World Cup 2026</span>
-          </div>
+          {/* Play CTA in footer */}
+          <button
+            onClick={onPlay}
+            style={{
+              display: "block",
+              width: "100%",
+              background: "linear-gradient(135deg,#16a34a,#4ade80)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 14,
+              padding: "15px 0",
+              fontSize: 15,
+              fontWeight: 900,
+              letterSpacing: "0.05em",
+              cursor: "pointer",
+              boxShadow: "0 4px 24px rgba(74,222,128,0.3)",
+              marginBottom: 0,
+            }}
+          >
+            PLAY FREE NOW
+          </button>
+        </div>
 
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.18)", margin: 0 }}>
-            2026 Kickoff2026.fun. All rights reserved.
-          </p>
+        {/* Bottom bar */}
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            padding: "18px 24px",
+            maxWidth: 480,
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
+            textAlign: "center",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
+              2026 Kickoff2026.fun
+            </span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.12)" }}>|</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.22)" }}>All rights reserved</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.12)" }}>|</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.22)" }}>
+              Celebrating FIFA World Cup 2026
+            </span>
+          </div>
         </div>
       </footer>
 
