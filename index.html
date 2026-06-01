@@ -627,14 +627,7 @@
   }
 
   .bingo-card::before {
-    content: 'BINGO';
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.3em;
-    color: var(--red);
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 0.5rem;
+    content: '';
   }
 
   .bingo-header {
@@ -1482,9 +1475,6 @@ function checkBingo() {
   if ([4,8,12,16,20].every(i => m[i])) [4,8,12,16,20].forEach(i => bingoState.bingos.add(i));
 
   if (bingoState.bingos.size > 0 && bingoState.bingos.size !== prev) {
-    const count = new Set([...bingoState.bingos].map(i => {
-      // rough line count
-    })).size || 1;
     document.getElementById('bingo-status').textContent = '🎉 BINGO! Line complete!';
     if (prev === 0) setTimeout(() => showResult('🎯 BINGO!', 'You got a line! Keep going for more!'), 300);
   } else if (bingoState.bingos.size === 0) {
