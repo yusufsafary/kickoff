@@ -55,7 +55,11 @@ function project(x3d: number, y3d: number, z3d: number) {
   return { px, py, scale };
 }
 
-export default function PenaltyGame() {
+interface PenaltyGameProps {
+  onBack?: () => void;
+}
+
+export default function PenaltyGame({ onBack }: PenaltyGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const stateRef = useRef<GameState>("menu");
@@ -1119,6 +1123,31 @@ export default function PenaltyGame() {
 
   return (
     <div className="game-container">
+      {onBack && (
+        <button
+          onClick={onBack}
+          style={{
+            position: "fixed",
+            top: 14,
+            left: 14,
+            zIndex: 100,
+            background: "rgba(0,0,0,0.55)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            color: "#fff",
+            borderRadius: 10,
+            padding: "6px 14px",
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1 }}>&#8592;</span> Home
+        </button>
+      )}
       <canvas
         ref={canvasRef}
         width={W}
