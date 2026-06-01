@@ -427,7 +427,7 @@ export default function Home({ onPlay }: HomeProps) {
       <Divider />
 
       {/* ===== RATINGS ===== */}
-      <section style={{ padding: "56px 20px", maxWidth: 480, margin: "0 auto" }}>
+      <section id="ratings" style={{ padding: "56px 20px", maxWidth: 480, margin: "0 auto" }}>
         <Reveal>
           <Tag>Your Rating</Tag>
           <SectionTitle>
