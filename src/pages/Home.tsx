@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Logo from "@/components/Logo";
 
@@ -6,31 +6,12 @@ interface HomeProps {
   onPlay: () => void;
 }
 
-function useInView() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setVisible(true); },
-      { threshold: 0.1 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return { ref, visible };
-}
-
 function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
-  const { ref, visible } = useInView();
   return (
     <div
-      ref={ref}
       style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
+        animation: `fadeUp 0.55s ease both`,
+        animationDelay: `${delay}ms`,
       }}
     >
       {children}
@@ -857,6 +838,10 @@ export default function Home({ onPlay }: HomeProps) {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(6px); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
